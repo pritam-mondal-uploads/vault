@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://pritam-mondal-uploads.github.io/vault/sitemap.xml

@@ -1,0 +1,1002 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Income Tax Calculator | Vault Finance</title>
+  <meta name="description" content="Estimate tax under one selected regime. Free, browser-based planning tool from Vault Finance.">
+  <style>
+    :root,[data-theme="premium-wealth"]{
+      --bg:#0f1722; --panel:#182331; --panel2:#223044; --text:#f8fafc; --muted:#b7c1cf;
+      --line:#344256; --accent:#d6b56d; --accent2:#2dd4bf; --accent3:#f3e6c3;
+      --soft:#2b3a4e; --warn:#3d3320; --bad:#3d2424; --good:#163729; --shadow:0 22px 54px rgba(0,0,0,.34);
+      --button-primary-bg:#d6b56d; --button-primary-text:#111827; --button-primary-border:#e8ca82;
+      --button-secondary-bg:#101827; --button-secondary-text:#f8fafc; --button-secondary-border:#d6b56d;
+      --button-secondary-hover:#243246; --input-bg:#101827; --result-text:#f8fafc;
+      --radius:8px;
+    }
+    [data-theme="emerald-ledger"]{
+      --bg:#071411; --panel:#10231e; --panel2:#18332b; --text:#effff9; --muted:#a5c4b9;
+      --line:#285345; --accent:#4ade80; --accent2:#22d3ee; --accent3:#d7fff0;
+      --soft:#173b2e; --warn:#493919; --bad:#472126; --good:#12452d; --shadow:0 22px 54px rgba(0,0,0,.4);
+      --button-primary-bg:#4ade80; --button-primary-text:#052e1b; --button-primary-border:#86efac;
+      --button-secondary-bg:#0a1915; --button-secondary-text:#effff9; --button-secondary-border:#4ade80;
+      --button-secondary-hover:#18332b; --input-bg:#081a15; --result-text:#effff9;
+    }
+    [data-theme="obsidian-rose"]{
+      --bg:#100d12; --panel:#201a23; --panel2:#302632; --text:#fff7fb; --muted:#c6acba;
+      --line:#574050; --accent:#fb7185; --accent2:#fbbf24; --accent3:#ffe4ec;
+      --soft:#422533; --warn:#493719; --bad:#4c202b; --good:#163c31; --shadow:0 22px 54px rgba(0,0,0,.42);
+      --button-primary-bg:#fb7185; --button-primary-text:#2b0710; --button-primary-border:#fda4af;
+      --button-secondary-bg:#171117; --button-secondary-text:#fff7fb; --button-secondary-border:#fb7185;
+      --button-secondary-hover:#302632; --input-bg:#160f17; --result-text:#fff7fb;
+    }
+    [data-theme="carbon-azure"]{
+      --bg:#080b10; --panel:#141a22; --panel2:#202936; --text:#f4f8ff; --muted:#aeb9c8;
+      --line:#34465c; --accent:#60a5fa; --accent2:#a3e635; --accent3:#dbeafe;
+      --soft:#1d3553; --warn:#413719; --bad:#402126; --good:#153c2a; --shadow:0 22px 54px rgba(0,0,0,.44);
+      --button-primary-bg:#60a5fa; --button-primary-text:#071526; --button-primary-border:#93c5fd;
+      --button-secondary-bg:#0c1118; --button-secondary-text:#f4f8ff; --button-secondary-border:#60a5fa;
+      --button-secondary-hover:#202936; --input-bg:#0c1118; --result-text:#f4f8ff;
+    }
+    [data-theme="noir-copper"]{
+      --bg:#110f0d; --panel:#221e1a; --panel2:#332b24; --text:#fffaf5; --muted:#c7b8aa;
+      --line:#59483a; --accent:#f59e63; --accent2:#38bdf8; --accent3:#ffead8;
+      --soft:#432d20; --warn:#4a3518; --bad:#482326; --good:#173d30; --shadow:0 22px 54px rgba(0,0,0,.44);
+      --button-primary-bg:#f59e63; --button-primary-text:#271006; --button-primary-border:#fdba8c;
+      --button-secondary-bg:#17130f; --button-secondary-text:#fffaf5; --button-secondary-border:#f59e63;
+      --button-secondary-hover:#332b24; --input-bg:#17130f; --result-text:#fffaf5;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--text);font:14px/1.4 Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+    button,input,select{font:inherit}
+    button{cursor:pointer}
+    .app{min-height:100vh;display:grid;grid-template-columns:240px 1fr;background:var(--bg);min-width:0;width:100%}
+    .sidebar{position:sticky;top:0;height:100vh;padding:24px 18px;border-right:1px solid var(--line);background:var(--panel);min-width:0}
+    .brand{display:flex;gap:12px;align-items:center;margin-bottom:22px;color:var(--text);text-decoration:none}.brand:hover h1{color:var(--accent)}
+    .mark{width:44px;height:44px;border:3px solid var(--accent);border-radius:50%;display:grid;place-items:center;color:var(--accent);font-weight:900;position:relative;box-shadow:inset 0 0 0 3px var(--panel)}
+    .mark:before,.mark:after{content:"";position:absolute;background:var(--accent)}.mark:before{width:5px;height:5px;border-radius:50%;right:3px;top:17px}.mark:after{width:11px;height:2px;left:14px;bottom:4px}
+    h1{font-size:.98rem;line-height:1.15;margin:0}
+    .tag{font-size:.7rem;color:var(--muted);margin-top:3px}
+    .main-tabs{display:grid;gap:8px;margin-top:18px}
+    .main-tabs button,.tool-tab,.sub-tab,.ghost,.primary,.icon-btn{
+      border:1px solid var(--line);background:transparent;color:var(--text);border-radius:8px;transition:.16s ease;
+    }
+    .main-tabs button{display:flex;align-items:center;gap:10px;padding:11px 12px;text-align:left}
+    .main-tabs button:hover,.tool-tab:hover,.sub-tab:hover,.icon-btn:hover{background:var(--panel2)}
+    .ghost:hover{background:var(--button-secondary-hover)}
+    .main-tabs button.active,.tool-tab.active,.sub-tab.active{background:var(--soft);border-color:var(--accent);color:var(--accent)}
+    .num{font-size:.72rem;color:var(--muted);font-weight:800;min-width:24px}
+    .note{font-size:.78rem;line-height:1.5;color:var(--muted);margin-top:18px}
+    .icon-btn{width:38px;height:38px;display:grid;place-items:center}
+    .theme-control{position:fixed;right:18px;top:16px;z-index:30}
+    .site-home-link{position:fixed;right:62px;top:16px;z-index:29;width:36px;height:36px;border:1px solid var(--line);border-radius:50%;background:var(--panel);color:var(--text);display:grid;place-items:center;text-decoration:none;font-size:1.05rem;box-shadow:var(--shadow)}
+    .site-home-link:hover{border-color:var(--accent);background:var(--soft);color:var(--accent)}
+    .site-home-link svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+    .theme-trigger{width:36px;height:36px;border:1px solid var(--line);border-radius:50%;background:var(--panel);color:var(--accent);display:grid;place-items:center;font-size:1.15rem;box-shadow:var(--shadow)}
+    .theme-trigger:hover{background:var(--panel2)}.theme-trigger[aria-expanded="true"]{border-color:var(--accent);background:var(--soft)}
+    .theme-menu{position:absolute;right:0;top:44px;width:214px;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--panel);box-shadow:var(--shadow)}
+    .theme-menu[hidden]{display:none}.theme-menu-title{padding:5px 7px 7px;color:var(--muted);font-size:.68rem;font-weight:800;text-transform:uppercase}
+    .theme-option{width:100%;display:grid;grid-template-columns:42px 1fr 16px;gap:9px;align-items:center;border:0;border-radius:6px;padding:8px;background:transparent;color:var(--text);text-align:left;font-size:.78rem}
+    .theme-option:hover,.theme-option.active{background:var(--soft)}.theme-option.active{color:var(--accent)}
+    .theme-swatches{display:flex}.theme-swatches i{display:block;width:14px;height:14px;border:2px solid var(--panel);border-radius:50%;margin-left:-4px}.theme-swatches i:first-child{margin-left:0}.theme-check{font-weight:900}
+    .mobile-menu-trigger{display:none}
+    main{padding:24px;max-width:1280px;width:100%;min-width:0;margin:0 auto}
+    .panel{display:none}.panel.active{display:block}
+    .hero{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;margin-bottom:18px}
+    h2{font-size:1.3rem;margin:0 0 6px}
+    h3{font-size:.95rem;margin:0 0 6px}
+    p{margin:0}
+    .sub{color:var(--muted);line-height:1.55;max-width:780px}
+    .calc-shell{display:block}
+    .navigator{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px;box-shadow:var(--shadow)}
+    .category-tabs{display:flex;gap:7px;overflow-x:auto;padding-bottom:10px;scrollbar-width:thin;max-width:100%;min-width:0}
+    .category-btn{border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:999px;padding:7px 11px;white-space:nowrap;font-weight:750;font-size:.76rem}
+    .category-btn.active{background:var(--soft);color:var(--accent);border-color:var(--accent)}
+    .tool-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;max-width:100%;min-width:0}
+    .tool-tab{width:100%;padding:9px 10px;text-align:left;display:grid;gap:2px;min-height:68px}
+    .tool-tab strong{font-size:.82rem}
+    .tool-tab span{font-size:.67rem;color:var(--muted);line-height:1.2}
+    .workspace{min-width:0;margin-top:14px}
+    .card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:16px;box-shadow:var(--shadow)}
+    .sub-tabs{display:flex;gap:7px;overflow:auto;padding-bottom:7px;margin:11px 0 13px}
+    .sub-tab{padding:7px 10px;white-space:nowrap;font-size:.77rem}
+    .tab-pane{display:none}.tab-pane.active{display:block}
+    .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    .grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+    .field{display:grid;gap:5px;margin-bottom:11px}
+    label{font-size:.72rem;font-weight:750;color:var(--accent3)}
+    input,select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:7px;background:var(--input-bg);color:var(--text);font-size:.82rem}
+    .hint{font-size:.68rem;color:var(--muted);line-height:1.35}
+    .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+    .primary{background:var(--button-primary-bg);border-color:var(--button-primary-border);color:var(--button-primary-text);padding:9px 13px;font-weight:800;font-size:.8rem}
+    .primary:disabled{opacity:.45;cursor:not-allowed;filter:saturate(.65)}
+    .ghost{padding:9px 13px;background:var(--button-secondary-bg);border-color:var(--button-secondary-border);color:var(--button-secondary-text);font-weight:750;font-size:.8rem}
+    .result-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:14px}
+    .metric{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:13px}
+    .metric span{display:block;font-size:.72rem;color:var(--muted);margin-bottom:6px}
+    .metric strong{font-size:.98rem}
+    .metric.good,.metric.warn{color:var(--result-text)}
+    .metric.good{background:var(--good)} .metric.warn{background:var(--warn)}
+    table{width:100%;border-collapse:collapse;margin-top:12px;font-size:.78rem}
+    th,td{padding:8px;border-bottom:1px solid var(--line);text-align:left}
+    th{font-size:.66rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+    .numcol{text-align:right;font-variant-numeric:tabular-nums}
+    .pill{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:999px;padding:5px 8px;font-size:.72rem;color:var(--muted);margin:3px 5px 3px 0}
+    .split{display:grid;grid-template-columns:1.2fr .8fr;gap:14px}
+    .list{display:grid;gap:10px}
+    .item{border:1px solid var(--line);border-radius:8px;padding:13px;background:var(--panel)}
+    .item p{color:var(--muted);font-size:.86rem;line-height:1.45;margin-top:5px}
+    .article-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+    .footer-note{margin-top:16px;color:var(--muted);font-size:.76rem;line-height:1.45}
+    .site-footer{margin-top:28px;padding:18px 0 6px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;color:var(--muted);font-size:.72rem}
+    .site-footer nav{display:flex;flex-wrap:wrap;gap:12px}.site-footer a{color:var(--muted);text-decoration:none}.site-footer a:hover{color:var(--accent)}
+    .route-link{display:inline-flex;align-items:center;text-decoration:none;margin-top:10px}
+    .home-band{margin-bottom:16px}.home-band h2{font-size:1.48rem}.home-kicker{color:var(--accent);font-weight:800;margin-bottom:5px;font-size:.72rem}
+    .popular-grid{display:grid;grid-template-columns:repeat(6,minmax(130px,1fr));gap:10px;margin-top:16px;overflow-x:auto;padding-bottom:3px;max-width:100%;min-width:0}
+    .popular-card{border:1px solid var(--line);background:var(--panel);color:var(--text);padding:10px;text-align:left;border-radius:8px;min-height:76px;font-size:.75rem}
+    .popular-card:hover{border-color:var(--accent);background:var(--panel2)}.popular-card strong{display:block;margin:5px 0 2px;font-size:.8rem}.popular-card span{font-size:.64rem;color:var(--muted)}
+    .search-wrap{display:grid;gap:9px;margin:0 0 14px}.search-wrap input{max-width:560px}
+    .category-tag{display:inline-flex;width:max-content;font-size:.61rem;text-transform:uppercase;color:var(--accent);font-weight:800}
+    .empty-search{padding:16px;color:var(--muted);font-size:.85rem}
+    .library-bar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:12px}
+    .eyebrow{display:block;color:var(--muted);font-size:.65rem;text-transform:uppercase;font-weight:800;margin-bottom:3px}
+    .library-actions{display:flex;gap:7px;align-items:center}.action-icon{width:34px;height:34px;padding:0;display:grid;place-items:center;font-size:1rem}
+    .picker-overlay{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.68);display:grid;place-items:center;padding:18px}
+    .picker-overlay[hidden]{display:none}.picker-dialog{width:min(720px,100%);max-height:min(720px,calc(100vh - 36px));display:grid;grid-template-rows:auto auto auto minmax(0,1fr);gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:16px;box-shadow:var(--shadow)}
+    .picker-head{display:flex;justify-content:space-between;align-items:center;gap:12px}.picker-head h2{margin:0}.picker-close{font-size:1.15rem}
+    .picker-search{display:grid;gap:5px}.picker-categories{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+    .picker-category{border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:7px;padding:8px;font-weight:750;font-size:.75rem}
+    .picker-category.active{border-color:var(--accent);background:var(--soft);color:var(--accent)}
+    .picker-tools{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;overflow-y:auto;align-content:start;padding-right:3px}
+    .picker-tool{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:7px;padding:10px;text-align:left;display:grid;grid-template-columns:34px 1fr;column-gap:9px;align-items:center}
+    .picker-tool:hover,.picker-tool.active{border-color:var(--accent);background:var(--soft)}.picker-tool-icon{grid-row:1/3;width:32px;height:32px;border-radius:6px;background:var(--soft);color:var(--accent);display:grid;place-items:center;font-size:.68rem;font-weight:900}
+    .picker-tool strong{font-size:.78rem}.picker-tool span:last-child{font-size:.65rem;color:var(--muted)}
+    body.modal-open{overflow:hidden}
+    .content-controls{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(180px,.5fr);gap:10px;margin-bottom:10px}
+    .content-meta{display:flex;justify-content:space-between;align-items:center;gap:10px;color:var(--muted);font-size:.72rem;margin:8px 0}
+    .content-results{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+    .library-entry{border:1px solid var(--line);border-radius:8px;background:var(--panel);overflow:hidden}
+    .library-entry summary{list-style:none;cursor:pointer;padding:11px;display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;font-weight:750;font-size:.8rem}
+    .library-entry summary::-webkit-details-marker{display:none}.library-entry summary:after{content:"+";color:var(--accent);font-size:1rem}.library-entry[open] summary:after{content:"-"}
+    .library-entry small{grid-column:1;color:var(--accent);font-size:.61rem;text-transform:uppercase}.library-entry p{padding:0 11px 11px;color:var(--muted);font-size:.74rem;line-height:1.5}
+    .pagination{display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-top:10px}.pagination span{font-size:.7rem;color:var(--muted)}
+    .home-dashboard{max-width:980px}.home-intro{padding:4px 0 12px;border-bottom:1px solid var(--line)}.home-intro h2{margin-bottom:5px}
+    .home-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}.home-stat{border:1px solid var(--line);border-radius:8px;background:var(--panel);padding:10px}
+    .home-stat strong{display:block;color:var(--accent);font-size:1.05rem}.home-stat span{color:var(--muted);font-size:.68rem}
+    .home-actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}.home-section{margin-top:18px}.home-section-head{display:flex;justify-content:space-between;align-items:end;gap:10px;margin-bottom:8px}.home-section-head p{font-size:.7rem;color:var(--muted)}
+    .scope-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.scope-card,.popular-tool{border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--text);text-align:left;padding:10px}
+    .scope-card:hover,.popular-tool:hover{border-color:var(--accent);background:var(--panel2)}.scope-card strong,.popular-tool strong{display:block;font-size:.8rem;margin-bottom:2px}.scope-card span,.popular-tool span{color:var(--muted);font-size:.65rem}
+    .scope-icon{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:6px;background:var(--soft);color:var(--accent);font-size:.62rem;font-weight:900;margin-bottom:7px}
+    .home-popular{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.popular-tool{display:grid;grid-template-columns:30px 1fr;column-gap:8px;align-items:center}.popular-tool .scope-icon{grid-row:1/3;margin:0}.home-secondary{margin-top:12px;font-size:.72rem;color:var(--muted)}.home-secondary button{margin-left:5px}
+    .cashflow{display:grid;grid-template-columns:1.05fr 1fr 1fr 40px;gap:10px;align-items:end;padding:10px 0;border-bottom:1px solid var(--line)}
+    .cashflow .field{margin-bottom:0}.remove-cf{margin-bottom:1px;color:var(--muted)}
+    .form-error{display:none;margin-top:10px;padding:10px 12px;border:1px solid #e36d75;background:var(--bad);color:var(--result-text);border-radius:8px;font-size:.8rem;line-height:1.4}
+    .form-error.show{display:block}.interpretation{margin-top:14px;padding:13px;border-left:3px solid var(--accent);background:var(--soft);line-height:1.5}
+    .timeline{display:grid;gap:8px;margin-top:14px}.timeline-item{display:grid;grid-template-columns:100px 12px 1fr auto;gap:9px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line);font-size:.8rem}
+    .timeline-dot{width:9px;height:9px;border-radius:50%;background:var(--accent)}.timeline-item.invest .timeline-dot{background:var(--accent2)}.timeline-date,.timeline-type{color:var(--muted)}
+    .main-tabs,.category-tabs,.tool-list,.popular-grid,.sub-tabs{scrollbar-width:none}.main-tabs::-webkit-scrollbar,.category-tabs::-webkit-scrollbar,.tool-list::-webkit-scrollbar,.popular-grid::-webkit-scrollbar,.sub-tabs::-webkit-scrollbar{display:none}
+    @media(max-width:760px){
+      body{font-size:13px}.app{grid-template-columns:minmax(0,1fr)}.sidebar{position:relative;height:max-content;align-self:start;padding:11px 132px 10px 12px;width:100%}
+      .brand{margin:0;min-width:0}.mark{width:36px;height:36px}.main-tabs{display:none;position:absolute;right:50px;top:50px;z-index:24;width:184px;margin:0;padding:7px;background:var(--panel);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow)}.main-tabs.open{display:grid}.main-tabs button{width:100%;padding:8px 9px;font-size:.72rem}.main-tabs .num{display:none}.sidebar .note{display:none}
+      .theme-control{position:absolute;right:11px;top:11px}.theme-trigger{width:34px;height:34px}.theme-menu{position:fixed;right:11px;top:52px}.mobile-menu-trigger{display:grid;position:absolute;right:51px;top:11px;z-index:23;width:34px;height:34px;border:1px solid var(--line);border-radius:50%;place-items:center;background:var(--panel);color:var(--text);font-size:1rem}.site-home-link{position:absolute;right:91px;top:11px;width:34px;height:34px;box-shadow:none}
+      main{padding:10px 12px 12px}.split{grid-template-columns:1fr}.article-grid{grid-template-columns:1fr 1fr}.library-bar{margin-bottom:9px}.library-bar h2{font-size:17px}.workspace{margin-top:0}.card{padding:12px}.picker-overlay{padding:0;place-items:stretch}.picker-dialog{width:100%;height:100%;max-height:none;border:0;border-radius:0;padding:12px;gap:10px}.picker-categories{grid-template-columns:repeat(2,minmax(0,1fr))}.picker-tools{grid-template-columns:1fr}.picker-tool{padding:9px}.content-controls{grid-template-columns:1fr}.content-results{grid-template-columns:1fr}.library-entry summary{padding:10px}.scope-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.home-popular{grid-template-columns:repeat(2,minmax(0,1fr))}.home-section{margin-top:14px}.home-actions .primary,.home-actions .ghost{flex:1 1 140px}
+    }
+    @media(max-width:680px){h2{font-size:18px}.grid2,.grid3,.result-grid,.article-grid{grid-template-columns:1fr}.cashflow{grid-template-columns:1fr;padding-right:42px;position:relative}.remove-cf{position:absolute;right:0;top:30px}.timeline-item{grid-template-columns:76px 10px 1fr}.timeline-item strong{grid-column:3}}
+  </style>
+
+  <link rel="canonical" href="https://pritam-mondal-uploads.github.io/vault/calculators/income-tax-calculator/">
+  <meta property="og:title" content="Income Tax Calculator | Vault Finance">
+  <meta property="og:description" content="Estimate tax under one selected regime. Free, browser-based planning tool from Vault Finance.">
+  <meta property="og:url" content="https://pritam-mondal-uploads.github.io/vault/calculators/income-tax-calculator/">
+  <script type="application/ld+json">[{"@context":"https://schema.org","@type":"WebSite","name":"Vault Finance","url":"https://pritam-mondal-uploads.github.io/vault/","description":"Free Indian personal finance calculators, explainers, and FAQs.","publisher":{"@id":"https://pritam-mondal-uploads.github.io/vault/#organization"}},{"@context":"https://schema.org","@type":"Organization","@id":"https://pritam-mondal-uploads.github.io/vault/#organization","name":"Vault Finance","url":"https://pritam-mondal-uploads.github.io/vault/","founder":{"@type":"Person","name":"Pritam Mondal"},"email":"pritam.nothing.cmf1@gmail.com","sameAs":["https://pritam-mondal-uploads.github.io/vault/about/"]},{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Income Tax Calculator","applicationCategory":"FinanceApplication","operatingSystem":"Any","url":"https://pritam-mondal-uploads.github.io/vault/calculators/income-tax-calculator/","description":"Estimate tax under one selected regime. Free, browser-based planning tool from Vault Finance.","offers":{"@type":"Offer","price":"0","priceCurrency":"INR"}},{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://pritam-mondal-uploads.github.io/vault/"},{"@type":"ListItem","position":2,"name":"Calculators","item":"https://pritam-mondal-uploads.github.io/vault/calculators/"},{"@type":"ListItem","position":3,"name":"Income Tax Calculator","item":"https://pritam-mondal-uploads.github.io/vault/calculators/income-tax-calculator/"}]}]</script>
+<noscript><style>#panel-home{display:none!important}#panel-calculators{display:block!important}</style></noscript></head>
+<body>
+<div class="app" data-theme="premium-wealth" id="appRoot">
+  <aside class="sidebar">
+    <a class="brand" href="https://pritam-mondal-uploads.github.io/vault/" aria-label="Go to Vault homepage"><div class="mark">&#8377;</div><div><h1>Vault Finance</h1><div class="tag">Finance Made Simple</div></div></a>
+    <nav class="main-tabs" id="mainTabs">
+      <button class="active" data-panel="home"><span class="num">01</span>Home</button>
+      <button data-panel="calculators"><span class="num">02</span>Calculators</button>
+      <button data-panel="reads"><span class="num">03</span>Reads</button>
+      <button data-panel="faq"><span class="num">04</span>FAQs</button>
+      <button data-panel="itr"><span class="num">05</span>ITR Selector</button>
+    </nav>
+    <p class="note">All inputs stay in your browser. Results are planning estimates and should be verified before financial decisions or filing.</p>
+  </aside>
+  <a class="site-home-link" href="https://pritam-mondal-uploads.github.io/vault/" aria-label="Go to Vault homepage" title="Go to Vault homepage"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7"></path><path d="M5 9v11h14V9"></path><path d="M9 20v-6h6v6"></path></svg></a>
+  <div class="theme-control" id="themeControl">
+    <button class="theme-trigger" id="themeTrigger" type="button" aria-label="Choose theme" aria-haspopup="true" aria-expanded="false" title="Choose theme" onclick="toggleThemeMenu()">&#9680;</button>
+    <div class="theme-menu" id="themeMenu" role="menu" hidden>
+      <div class="theme-menu-title">Choose theme</div>
+      <button class="theme-option" type="button" role="menuitem" data-theme-value="premium-wealth" onclick="setTheme('premium-wealth')"><span class="theme-swatches"><i style="background:#0f1722"></i><i style="background:#d6b56d"></i><i style="background:#2dd4bf"></i></span><span>Premium Wealth</span><span class="theme-check"></span></button>
+      <button class="theme-option" type="button" role="menuitem" data-theme-value="emerald-ledger" onclick="setTheme('emerald-ledger')"><span class="theme-swatches"><i style="background:#071411"></i><i style="background:#4ade80"></i><i style="background:#22d3ee"></i></span><span>Emerald Ledger</span><span class="theme-check"></span></button>
+      <button class="theme-option" type="button" role="menuitem" data-theme-value="obsidian-rose" onclick="setTheme('obsidian-rose')"><span class="theme-swatches"><i style="background:#100d12"></i><i style="background:#fb7185"></i><i style="background:#fbbf24"></i></span><span>Obsidian Rose</span><span class="theme-check"></span></button>
+      <button class="theme-option" type="button" role="menuitem" data-theme-value="carbon-azure" onclick="setTheme('carbon-azure')"><span class="theme-swatches"><i style="background:#080b10"></i><i style="background:#60a5fa"></i><i style="background:#a3e635"></i></span><span>Carbon Azure</span><span class="theme-check"></span></button>
+      <button class="theme-option" type="button" role="menuitem" data-theme-value="noir-copper" onclick="setTheme('noir-copper')"><span class="theme-swatches"><i style="background:#110f0d"></i><i style="background:#f59e63"></i><i style="background:#38bdf8"></i></span><span>Noir Copper</span><span class="theme-check"></span></button>
+    </div>
+  </div>
+  <button class="mobile-menu-trigger" id="mobileMenuTrigger" type="button" aria-label="Open navigation" aria-expanded="false" onclick="toggleMobileMenu()">&#9776;</button>
+  <div class="picker-overlay" id="calculatorPicker" hidden onclick="pickerBackdropClick(event)">
+    <div class="picker-dialog" role="dialog" aria-modal="true" aria-labelledby="pickerTitle">
+      <div class="picker-head"><div><span class="eyebrow">Vault Finance</span><h2 id="pickerTitle">Choose a calculator</h2></div><button class="icon-btn picker-close" type="button" aria-label="Close calculator picker" onclick="closeCalculatorPicker()">&#215;</button></div>
+      <div class="picker-search"><label for="pickerSearch">Search calculators</label><input id="pickerSearch" type="search" placeholder="Search SIP, EMI, tax, retirement..." oninput="renderPickerTools(this.value)"></div>
+      <div class="picker-categories" id="pickerCategories"></div>
+      <div class="picker-tools" id="pickerTools"></div>
+    </div>
+  </div>
+  <main>
+    <section class="panel active" id="panel-home">
+      <div class="home-dashboard">
+        <div class="home-intro"><span class="eyebrow">Finance Made Simple</span><h2>Vault Finance</h2><p class="sub">Free tools and practical guidance for taxes, investments, banking, loans, salary, and retirement planning.</p>
+          <div class="home-stats"><div class="home-stat"><strong id="homeCalcCount">20</strong><span>Calculators</span></div><div class="home-stat"><strong id="homeReadCount">96</strong><span>Recommended reads</span></div><div class="home-stat"><strong id="homeFaqCount">67</strong><span>FAQs answered</span></div></div>
+          <div class="home-actions"><button class="primary" type="button" onclick="openCalculatorPicker()">Browse calculators</button><button class="ghost" type="button" onclick="openPanel('reads')">Explore reads</button><button class="ghost" type="button" onclick="openPanel('faq')">View FAQs</button></div>
+        </div>
+        <section class="home-section"><div class="home-section-head"><div><span class="eyebrow">Explore by goal</span><h3>Finance verticals</h3></div><p>Choose a category to see its calculators.</p></div>
+          <div class="scope-grid">
+            <button class="scope-card" type="button" onclick="openCategoryPicker('Taxes')"><span class="scope-icon">TX</span><strong>Taxes</strong><span>Income tax, regimes, gains, GST, and 80C</span></button>
+            <button class="scope-card" type="button" onclick="openCategoryPicker('Investments')"><span class="scope-icon">IN</span><strong>Investments</strong><span>SIP, step-up SIP, lumpsum, SWP, and XIRR</span></button>
+            <button class="scope-card" type="button" onclick="openCategoryPicker('Banking')"><span class="scope-icon">BK</span><strong>Banking</strong><span>Fixed and recurring deposits</span></button>
+            <button class="scope-card" type="button" onclick="openCategoryPicker('Loans')"><span class="scope-icon">LN</span><strong>Loans</strong><span>EMI and repayment planning</span></button>
+            <button class="scope-card" type="button" onclick="openCategoryPicker('Retirement')"><span class="scope-icon">RT</span><strong>Retirement</strong><span>PPF, NPS, gratuity, and EPF</span></button>
+            <button class="scope-card" type="button" onclick="openCategoryPicker('Salary')"><span class="scope-icon">SL</span><strong>Salary</strong><span>In-hand pay, HRA, and RSU tax</span></button>
+          </div>
+        </section>
+        <section class="home-section"><div class="home-section-head"><div><span class="eyebrow">Quick start</span><h3>Popular calculators</h3></div></div>
+          <div class="home-popular">
+            <button class="popular-tool" type="button" onclick="openCalculatorTool('income')"><span class="scope-icon">TX</span><strong>Income Tax</strong><span>Estimate annual tax</span></button>
+            <button class="popular-tool" type="button" onclick="openCalculatorTool('sip')"><span class="scope-icon">SI</span><strong>SIP</strong><span>Project monthly investing</span></button>
+            <button class="popular-tool" type="button" onclick="openCalculatorTool('emi')"><span class="scope-icon">EM</span><strong>EMI</strong><span>Plan loan repayments</span></button>
+            <button class="popular-tool" type="button" onclick="openCalculatorTool('fd')"><span class="scope-icon">FD</span><strong>Fixed Deposit</strong><span>Estimate maturity value</span></button>
+          </div>
+          <p class="home-secondary">Planning deductions too? <button class="ghost" type="button" onclick="openPanel('deductions')">Open Deductions Guide</button></p>
+        </section>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-calculators">
+      <div class="library-bar">
+        <div><span class="eyebrow">Calculator workspace</span><h2>Personal Finance Calculators</h2></div>
+        <div class="library-actions"><button class="ghost" type="button" onclick="openCalculatorPicker()">Change calculator</button><button class="ghost action-icon" type="button" aria-label="Print or save PDF" title="Print or save PDF" onclick="window.print()">&#9113;</button></div>
+      </div>
+      <div class="route-intro card">
+  <span class="eyebrow">Taxes</span>
+  <h1>Income Tax Calculator</h1>
+  <p class="sub">Estimate tax under one selected regime.</p>
+  <details><summary>Inputs used by this calculator</summary><ul><li>Annual gross income (Rs)</li><li>Regime</li><li>Income type</li><li>Old-regime deductions, if any (Rs)</li></ul></details>
+  <p class="footer-note">Results are planning estimates. Tax and investment rules may change, and individual circumstances vary.</p>
+</div>
+      <div class="workspace">
+        <div class="card">
+          <h2 id="toolTitle"></h2>
+          <p class="sub" id="toolDesc"></p>
+          <a class="ghost route-link" id="calculatorPermalink" href="/vault/calculators/income-tax-calculator/">Open shareable calculator page</a>
+          <div class="sub-tabs" id="subTabs"></div>
+          <div id="toolPanes"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-itr">
+      <div class="hero"><div><h2>ITR Form Selector</h2><p class="sub">Answer a few questions to shortlist the likely return form.</p></div></div>
+      <div class="card">
+        <div class="grid2">
+          <div class="field"><label>Residential status</label><select id="itrResident"><option value="resident">Resident</option><option value="nri">NRI / non-resident</option></select></div>
+          <div class="field"><label>Income profile</label><select id="itrIncome"><option value="salary">Salary / pension only</option><option value="house">Salary + one house property</option><option value="capital">Capital gains</option><option value="businessp">Presumptive business / profession</option><option value="business">Regular business / profession</option></select></div>
+          <div class="field"><label>Foreign assets or income?</label><select id="itrForeign"><option value="no">No</option><option value="yes">Yes</option></select></div>
+          <div class="field"><label>Crypto / VDA income?</label><select id="itrCrypto"><option value="no">No</option><option value="yes">Yes</option></select></div>
+        </div>
+        <div class="actions"><button class="primary" onclick="selectITR()">Find form</button></div>
+        <div class="result-grid" id="itrResult"></div>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-deductions">
+      <div class="hero"><div><h2>Deductions Guide</h2><p class="sub">Quick reference for common deductions and whether they matter under old or new regime.</p></div></div>
+      <div class="article-grid" id="deductionGrid"></div>
+    </section>
+
+    <section class="panel" id="panel-reads">
+      <div class="hero"><div><h2>Reads</h2><p class="sub">Practical explainers for taxes, investing, salary, banking, and long-term planning.</p></div></div>
+      <div class="content-controls"><div class="field"><label for="readsSearch">Search reads</label><input id="readsSearch" type="search" placeholder="Search tax, XIRR, Form 16, retirement..." oninput="filterReads()"></div><div class="field"><label for="readsCategory">Category</label><select id="readsCategory" onchange="filterReads()"></select></div></div>
+      <div class="content-meta"><span id="readsMeta"></span><span>10 per page</span></div>
+      <div class="content-results" id="readsGrid"></div>
+      <div class="pagination" id="readsPagination"></div>
+    </section>
+
+    <section class="panel" id="panel-faq">
+      <div class="hero"><div><h2>FAQs</h2><p class="sub">Concise answers to common questions across tax, investments, salary, banking, GST, and loans.</p></div></div>
+      <div class="content-controls"><div class="field"><label for="faqSearch">Search FAQs</label><input id="faqSearch" type="search" placeholder="Search SIP, HRA, RSU, FD, EMI..." oninput="filterFaqs()"></div><div class="field"><label for="faqCategory">Category</label><select id="faqCategory" onchange="filterFaqs()"></select></div></div>
+      <div class="content-meta"><span id="faqMeta"></span><span>10 per page</span></div>
+      <div class="content-results" id="faqList"></div>
+      <div class="pagination" id="faqPagination"></div>
+    </section>
+    <footer class="site-footer">
+      <span>Vault Finance &middot; Finance Made Simple</span>
+      <nav aria-label="Footer">
+        <a href="/vault/">Home</a><a href="/vault/calculators/">Calculators</a><a href="/vault/reads/">Reads</a><a href="/vault/faqs/">FAQs</a><a href="/vault/about/">About</a><a href="/vault/privacy/">Privacy</a><a href="/vault/contact/">Contact</a>
+      </nav>
+    </footer>
+  </main>
+</div>
+
+<script>
+const rupee = n => 'Rs ' + Math.round(Number(n)||0).toLocaleString('en-IN');
+const val = id => Number(document.getElementById(id)?.value || 0);
+const choice = id => document.getElementById(id)?.value;
+const monthsBetween = (start,end) => {
+  if(!start || !end) return 0;
+  const a=new Date(start), b=new Date(end);
+  return Math.max(0,(b.getFullYear()-a.getFullYear())*12 + b.getMonth()-a.getMonth());
+};
+function slabTaxNew(ti){
+  const slabs=[[400000,0],[800000,.05],[1200000,.10],[1600000,.15],[2000000,.20],[2400000,.25],[Infinity,.30]];
+  let tax=0, prev=0; for(const [limit,rate] of slabs){ if(ti>prev){ tax+=(Math.min(ti,limit)-prev)*rate; prev=limit; } } return tax;
+}
+function slabTaxOld(ti){
+  const slabs=[[250000,0],[500000,.05],[1000000,.20],[Infinity,.30]];
+  let tax=0, prev=0; for(const [limit,rate] of slabs){ if(ti>prev){ tax+=(Math.min(ti,limit)-prev)*rate; prev=limit; } } return tax;
+}
+function taxByRegime(taxable, regime){
+  taxable=Math.max(0,taxable);
+  let pre = regime==='new' ? slabTaxNew(taxable) : slabTaxOld(taxable);
+  const rebateLimit = regime==='new' ? 1200000 : 500000;
+  if(taxable<=rebateLimit) pre=0;
+  return Math.round(pre*1.04);
+}
+function metric(label,value,klass=''){return `<div class="metric ${klass}"><span>${label}</span><strong>${value}</strong></div>`}
+function formatMoney(value){return rupee(value)}
+function formatPercent(value){return `${Number(value).toLocaleString('en-IN',{maximumFractionDigits:2})}%`}
+function formatYears(value){return `${formatNumber(value)} ${Number(value)===1?'Year':'Years'}`}
+function formatMonths(value){return `${formatNumber(value)} ${Number(value)===1?'Month':'Months'}`}
+function formatNumber(value){return Number(value).toLocaleString('en-IN',{maximumFractionDigits:2})}
+function formatTyped(value,type='money'){
+  if(type==='percent') return formatPercent(value);
+  if(type==='years') return formatYears(value);
+  if(type==='months') return formatMonths(value);
+  if(type==='number') return formatNumber(value);
+  if(type==='text') return String(value);
+  return formatMoney(value);
+}
+function rows(obj){return Object.entries(obj).map(([k,item])=>{
+  const typed=item&&typeof item==='object'&&Object.prototype.hasOwnProperty.call(item,'value');
+  const value=typed?formatTyped(item.value,item.type):typeof item==='number'?formatMoney(item):item;
+  return `<tr><td>${k}</td><td class="numcol">${value}</td></tr>`;
+}).join('')}
+function setHTML(id,html){document.getElementById(id).innerHTML=html}
+function activatePane(index){
+  document.querySelectorAll('.sub-tab').forEach(b=>b.classList.toggle('active',b.dataset.pane===String(index)));
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.toggle('active',p.dataset.pane===String(index)));
+}
+function incomeTaxDetails(gross, regime, salaried=true, oldDed=0){
+  const std = salaried ? (regime==='new' ? 75000 : 50000) : 0;
+  const deductions = regime==='old' ? oldDed : 0;
+  const taxable = Math.max(gross - std - deductions, 0);
+  return { taxable, tax: taxByRegime(taxable, regime), std, deductions };
+}
+function wireFormValidation(){
+  document.querySelectorAll('.calc-form').forEach(form=>{
+    const btn = form.querySelector('[data-calc-btn]');
+    const required = [...form.querySelectorAll('[data-required]')];
+    const check = () => {
+      const ready = required.every(el => {
+        if(el.value === '') return false;
+        if(el.type === 'number') return Number(el.value) >= 0;
+        return true;
+      });
+      if(btn) btn.disabled = !ready;
+    };
+    form.querySelectorAll('input,select').forEach(el=>{
+      el.addEventListener('input', check);
+      el.addEventListener('change', check);
+    });
+    check();
+  });
+}
+function visibleFormReady(){
+  const form = document.querySelector('.tab-pane.active .calc-form');
+  if(!form) return true;
+  const required = [...form.querySelectorAll('[data-required]')];
+  const ready = required.every(el => {
+    if(el.value === '') return false;
+    if(el.type === 'number') return Number(el.value) >= 0;
+    return true;
+  });
+  const btn = form.querySelector('[data-calc-btn]');
+  if(btn) btn.disabled = !ready;
+  return ready;
+}
+function investmentNote(){return `<p class="sub">Returns are estimates and not guaranteed. Tax calculation is simplified and may differ based on asset type, holding period, and future tax rules.</p>`}
+function contentSlug(value){
+  return String(value).toLowerCase().replace(/&/g,' and ').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+}
+function readSlug(item){
+  return item.title==='Emergency Fund Guide' ? contentSlug(`${item.title} ${item.category}`) : contentSlug(item.title);
+}
+
+const tools = [
+  {id:'income',title:'Income Tax Calculator',desc:'Estimate tax under one selected regime.',category:'Taxes',icon:'TX',tabs:['Inputs','Result','Notes'],short:'Tax by regime'},
+  {id:'compare',title:'Old vs New Regime Comparison',desc:'Compare both income-tax regimes.',category:'Taxes',icon:'RC',tabs:['Inputs','Result','Notes'],short:'Best regime'},
+  {id:'gains',title:'Capital Gains Tax Calculator',desc:'Estimate tax on investment or property gains.',category:'Taxes',icon:'CG',tabs:['Inputs','Result','Notes'],short:'STCG / LTCG'},
+  {id:'gst',title:'GST Calculator',desc:'Add or remove GST from an amount.',category:'Taxes',icon:'GS',tabs:['Inputs','Result','Notes'],short:'Add / remove GST'},
+  {id:'c80c',title:'Section 80C Planner',desc:'Track eligible savings against the deduction cap.',category:'Taxes',icon:'80',tabs:['Inputs','Result','Notes'],short:'Rs 1.5L cap'},
+  {id:'sip',title:'SIP Calculator',desc:'Project a fixed monthly investment.',category:'Investments',icon:'SI',tabs:['Inputs','Result','Notes'],short:'Monthly investing'},
+  {id:'stepSip',title:'Step-up SIP Calculator',desc:'Project a SIP that increases every year.',category:'Investments',icon:'SU',tabs:['Inputs','Result','Notes'],short:'Growing SIP'},
+  {id:'lumpsum',title:'Lumpsum Calculator',desc:'Project a one-time investment.',category:'Investments',icon:'LS',tabs:['Inputs','Result','Notes'],short:'One-time investing'},
+  {id:'swp',title:'SWP Calculator',desc:'Model regular withdrawals from a corpus.',category:'Investments',icon:'SW',tabs:['Inputs','Result','Notes'],short:'Monthly withdrawals'},
+  {id:'xirr',title:'Investment Return (XIRR) Calculator',desc:'Annualised return when investments and withdrawals happen on different dates.',category:'Investments',icon:'XR',tabs:['Inputs','Result','Notes'],short:'Irregular returns'},
+  {id:'fd',title:'FD Calculator',desc:'Estimate fixed-deposit maturity and post-tax value.',category:'Banking',icon:'FD',tabs:['Inputs','Result','Notes'],short:'Fixed deposit'},
+  {id:'rd',title:'RD Calculator',desc:'Estimate recurring-deposit maturity.',category:'Banking',icon:'RD',tabs:['Inputs','Result','Notes'],short:'Recurring deposit'},
+  {id:'emi',title:'EMI Calculator',desc:'Calculate loan EMI and total interest.',category:'Loans',icon:'EM',tabs:['Inputs','Result','Notes'],short:'Loan repayment'},
+  {id:'ppf',title:'PPF Calculator',desc:'Project long-term PPF savings.',category:'Retirement',icon:'PP',tabs:['Inputs','Result','Notes'],short:'Secure savings'},
+  {id:'nps',title:'NPS Tax Benefit Calculator',desc:'Estimate NPS tax benefits.',category:'Retirement',icon:'NP',tabs:['Inputs','Result','Notes'],short:'NPS benefit'},
+  {id:'gratuity',title:'Gratuity Calculator',desc:'Estimate gratuity and exemption.',category:'Retirement',icon:'GR',tabs:['Inputs','Result','Notes'],short:'Exit benefit'},
+  {id:'epf',title:'EPF Maturity Calculator',desc:'Project employee provident-fund corpus.',category:'Retirement',icon:'EP',tabs:['Inputs','Result','Notes'],short:'PF corpus'},
+  {id:'salary',title:'In-Hand Salary Calculator',desc:'Convert CTC into estimated take-home pay.',category:'Salary',icon:'IH',tabs:['Inputs','Result','Notes'],short:'Monthly pay'},
+  {id:'hra',title:'HRA Exemption Calculator',desc:'Calculate old-regime HRA exemption.',category:'Salary',icon:'HR',tabs:['Inputs','Result','Notes'],short:'Rent benefit'},
+  {id:'rsu',title:'RSU Tax Calculator',desc:'Estimate stock compensation tax.',category:'Salary',icon:'RS',tabs:['Inputs','Result','Notes'],short:'Stock comp'}
+];
+
+const paneHTML = {};
+
+const toolsV2 = tools;
+
+const paneHTMLV2 = {
+income: [
+`<div class="calc-form"><div class="grid2"><div class="field"><label>Annual gross income (Rs)</label><input id="incGross" data-required type="number" value="1200000" min="0"></div><div class="field"><label>Regime</label><select id="incRegime" data-required><option value="new">New regime</option><option value="old">Old regime</option></select></div><div class="field"><label>Income type</label><select id="incType" data-required><option value="salaried">Salaried / pension</option><option value="other">Business / other</option></select></div><div class="field"><label>Old-regime deductions, if any (Rs)</label><input id="incDed" type="number" value="150000" min="0"><p class="hint">Used only when old regime is selected.</p></div></div><div class="actions"><button class="primary" data-calc-btn onclick="calcIncome()">Calculate tax</button></div></div>`,
+`<div id="incomeResult" class="result-grid"></div><table id="incomeTable"></table>`,
+`<p class="sub">This calculator applies standard deduction for salaried taxpayers, 87A rebate thresholds, and 4% cess. Surcharge and special-rate incomes are simplified here; use the capital gains and RSU calculators for those verticals.</p>`],
+compare: [
+`<div class="calc-form"><div class="grid2"><div class="field"><label>Annual gross income (Rs)</label><input id="cmpGross" data-required type="number" value="1800000" min="0"></div><div class="field"><label>Income type</label><select id="cmpType" data-required><option value="salaried">Salaried / pension</option><option value="other">Business / other</option></select></div><div class="field"><label>80C total (Rs)</label><input id="cmp80c" type="number" value="150000" min="0"></div><div class="field"><label>80D medical insurance (Rs)</label><input id="cmp80d" type="number" value="25000" min="0"></div><div class="field"><label>HRA exemption (Rs)</label><input id="cmpHra" type="number" value="120000" min="0"></div><div class="field"><label>Home loan interest (Rs)</label><input id="cmpHome" type="number" value="0" min="0"></div><div class="field"><label>NPS 80CCD(1B) (Rs)</label><input id="cmpNps" type="number" value="50000" min="0"></div><div class="field"><label>Other old-regime deductions (Rs)</label><input id="cmpOther" type="number" value="0" min="0"></div></div><div class="actions"><button class="primary" data-calc-btn onclick="calcCompare()">Compare regimes</button></div></div>`,
+`<div id="compareResult" class="result-grid"></div><table id="compareTable"></table>`,
+`<p class="sub">Old regime uses eligible deductions. New regime keeps only standard deduction and selected employer benefits.</p>`],
+salary: [
+`<div class="calc-form"><div class="grid2"><div class="field"><label>Annual CTC (Rs)</label><input id="salCtc" data-required type="number" value="2400000" min="0"></div><div class="field"><label>Annual bonus / variable pay (Rs)</label><input id="salBonus" type="number" value="200000" min="0"></div><div class="field"><label>Monthly basic salary (Rs)</label><input id="salBasic" data-required type="number" value="80000" min="0"></div><div class="field"><label>Monthly HRA (Rs)</label><input id="salHra" type="number" value="40000" min="0"></div><div class="field"><label>Employee PF (% of basic)</label><input id="salEmpPfPct" data-required type="number" value="12" min="0" max="100"></div><div class="field"><label>Employer PF (% of basic inside CTC)</label><input id="salErPfPct" data-required type="number" value="3.67" min="0" max="100"></div><div class="field"><label>Professional tax per month (Rs)</label><input id="salPt" type="number" value="200" min="0"></div><div class="field"><label>Tax regime for TDS estimate</label><select id="salRegime" data-required><option value="new">New regime</option><option value="old">Old regime</option></select></div><div class="field"><label>Old-regime deductions, if any (Rs)</label><input id="salOldDed" type="number" value="150000" min="0"><p class="hint">Used only when old regime is selected. TDS is calculated by the app.</p></div></div><div class="actions"><button class="primary" data-calc-btn onclick="calcSalary()">Calculate take-home</button></div></div>`,
+`<div id="salaryResult" class="result-grid"></div><table id="salaryTable"></table>`,
+`<p class="sub">The calculator derives employee PF, employer PF, annual taxable salary, income tax, and estimated monthly TDS from the values you enter.</p>`],
+hra: [
+`<div class="calc-form"><div class="grid2"><div class="field"><label>Annual basic salary (Rs)</label><input id="hraBasic" data-required type="number" value="960000" min="0"></div><div class="field"><label>Annual DA forming retirement benefits (Rs)</label><input id="hraDa" type="number" value="0" min="0"></div><div class="field"><label>Annual HRA received (Rs)</label><input id="hraReceived" data-required type="number" value="480000" min="0"></div><div class="field"><label>Annual rent paid (Rs)</label><input id="hraRent" data-required type="number" value="360000" min="0"></div><div class="field"><label>City type</label><select id="hraMetro" data-required><option value="metro">Metro: Delhi, Mumbai, Kolkata, Chennai</option><option value="non">Non-metro</option></select></div></div><div class="actions"><button class="primary" data-calc-btn onclick="calcHra()">Calculate HRA</button></div></div>`,
+`<div id="hraResult" class="result-grid"></div><table id="hraTable"></table>`,
+`<p class="sub">Exemption is the least of actual HRA, rent paid minus 10% of salary, and 50%/40% of salary based on city type.</p>`],
+gains: [
+`<div class="calc-form"><div class="grid2"><div class="field"><label>Asset type</label><select id="gainType" data-required><option value="listed">Listed equity / equity mutual fund</option><option value="property">Property</option><option value="unlisted">Unlisted / foreign share</option><option value="debt">Debt fund / other asset</option></select></div><div class="field"><label>Sale value (Rs)</label><input id="gainSale" data-required type="number" value="850000" min="0"></div><div class="field"><label>Purchase / cost value (Rs)</label><input id="gainCost" data-required type="number" value="500000" min="0"></div><div class="field"><label>Transfer expenses (Rs)</label><input id="gainExpense" type="number" value="5000" min="0"></div><div class="field"><label>Purchase date</label><input id="gainBuyDate" data-required type="date" value="2024-01-01"></div><div class="field"><label>Sale date</label><input id="gainSaleDate" data-required type="date" value="2026-06-30"></div></div><div class="actions"><button class="primary" data-calc-btn onclick="calcGains()">Calculate gains tax</button></div></div>`,
+`<div id="gainsResult" class="result-grid"></div><table id="gainsTable"></table>`,
+`<p class="sub">Dates are required so the app can classify the gain as short-term or long-term instead of guessing.</p>`],
+c80c: [
+`<div class="calc-form"><div class="grid3"><div class="field"><label>EPF (Rs)</label><input id="c80cEpf" type="number" value="60000" min="0"></div><div class="field"><label>ELSS (Rs)</label><input id="c80cElss" type="number" value="30000" min="0"></div><div class="field"><label>PPF (Rs)</label><input id="c80cPpf" type="number" value="30000" min="0"></div><div class="field"><label>Life insurance premium (Rs)</label><input id="c80cLife" type="number" value="20000" min="0"></div><div class="field"><label>Home loan principal (Rs)</label><input id="c80cHome" type="number" value="0" min="0"></div><div class="field"><label>Children tuition fees (Rs)</label><input id="c80cTuition" type="number" value="0" min="0"></div></div><div class="actions"><button class="primary" data-calc-btn onclick="calc80C()">Plan 80C</button></div></div>`,
+`<div id="c80cResult" class="result-grid"></div><table id="c80cTable"></table>`,
+`<div class="list"><div class="item"><strong>Liquidity ladder</strong><p>ELSS has a 3-year lock-in, tax-saving FDs have 5 years, PPF has 15 years, and EPF is tied to employment/withdrawal rules.</p></div><div class="item"><strong>Use existing deductions first</strong><p>EPF, tuition fees, insurance premiums, and home loan principal may already fill the cap before adding new investments.</p></div></div>`],
+nps: [
+`<div class="calc-form"><div class="grid2"><div class="field"><label>Annual gross income before NPS (Rs)</label><input id="npsIncome" data-required type="number" value="1800000" min="0"></div><div class="field"><label>Tax regime</label><select id="npsRegime" data-required><option value="old">Old regime</option><option value="new">New regime</option></select></div><div class="field"><label>Basic + DA annual salary (Rs)</label><input id="npsSalary" data-required type="number" value="900000" min="0"></div><div class="field"><label>Own NPS contribution (Rs)</label><input id="npsOwn" type="number" value="50000" min="0"></div><div class="field"><label>Employer NPS contribution (Rs)</label><input id="npsEmployer" type="number" value="120000" min="0"></div><div class="field"><label>Other old-regime deductions (Rs)</label><input id="npsOtherDed" type="number" value="150000" min="0"><p class="hint">Used only when old regime is selected. Tax saved is calculated by the app.</p></div></div><div class="actions"><button class="primary" data-calc-btn onclick="calcNps()">Calculate benefit</button></div></div>`,
+`<div id="npsResult" class="result-grid"></div><table id="npsTable"></table>`,
+`<p class="sub">Old regime can include own contribution under 80CCD(1B). Employer NPS can also reduce taxable salary within salary-linked limits.</p>`],
+gratuity: [
+`<div class="calc-form"><div class="grid2"><div class="field"><label>Last drawn monthly basic + DA (Rs)</label><input id="graBasic" data-required type="number" value="80000" min="0"></div><div class="field"><label>Completed service (Years)</label><input id="graYears" data-required type="number" value="10" min="0" step="1"></div><div class="field"><label>Covered under Gratuity Act?</label><select id="graCovered" data-required><option value="yes">Yes</option><option value="no">No</option></select></div><div class="field"><label>Actual gratuity received (Rs)</label><input id="graActual" data-required type="number" value="500000" min="0"></div></div><div class="actions"><button class="primary" data-calc-btn onclick="calcGratuity()">Calculate gratuity</button></div></div>`,
+`<div id="gratuityResult" class="result-grid"></div><table id="gratuityTable"></table>`,
+`<p class="sub">For covered employees, common estimate is 15/26 x last basic+DA x completed years. Tax exemption is usually the least of actual amount, formula amount, and statutory cap.</p>`],
+epf: [
+`<div class="calc-form"><div class="grid2"><div class="field"><label>Current EPF balance (Rs)</label><input id="epfBalance" data-required type="number" value="500000" min="0"></div><div class="field"><label>Monthly basic salary (Rs)</label><input id="epfBasic" data-required type="number" value="60000" min="0"></div><div class="field"><label>Employee contribution (%)</label><input id="epfEmpPct" data-required type="number" value="12" min="0" max="100"></div><div class="field"><label>Employer contribution to EPF (%)</label><input id="epfErPct" data-required type="number" value="3.67" min="0" max="100"></div><div class="field"><label>Annual salary growth (%)</label><input id="epfGrowth" data-required type="number" value="7" min="0"></div><div class="field"><label>EPF interest rate (%)</label><input id="epfRate" data-required type="number" value="8.25" min="0"></div><div class="field"><label>Projection period (Years)</label><input id="epfYears" data-required type="number" value="15" min="1" step="1"></div></div><div class="actions"><button class="primary" data-calc-btn onclick="calcEpf()">Project EPF</button></div></div>`,
+`<div id="epfResult" class="result-grid"></div><table id="epfTable"></table>`,
+`<p class="sub">Employee and employer contributions are calculated from monthly basic salary and the contribution percentages entered.</p>`],
+rsu: [
+`<div class="calc-form"><div class="grid2"><div class="field"><label>Annual salary before RSU vesting (Rs)</label><input id="rsuSalary" data-required type="number" value="2400000" min="0"></div><div class="field"><label>Tax regime for salary tax</label><select id="rsuRegime" data-required><option value="new">New regime</option><option value="old">Old regime</option></select></div><div class="field"><label>Shares vested (Number)</label><input id="rsuVestShares" data-required type="number" value="100" min="0" step="1"></div><div class="field"><label>FMV / vest price per share (Rs)</label><input id="rsuVestPrice" data-required type="number" value="2500" min="0"></div><div class="field"><label>Company type</label><select id="rsuCompany" data-required><option value="foreign">Foreign / group company</option><option value="indian">Indian company</option></select></div><div class="field"><label>Old-regime deductions, if any (Rs)</label><input id="rsuOldDed" type="number" value="150000" min="0"></div><div class="field"><label>Shares sold (Number)</label><input id="rsuSaleShares" type="number" value="60" min="0" step="1"></div><div class="field"><label>Sale price per share (Rs)</label><input id="rsuSalePrice" type="number" value="3200" min="0"></div><div class="field"><label>Holding period after vest (Months)</label><input id="rsuMonths" type="number" value="14" min="0" step="1"></div><div class="field"><label>Listed in India?</label><select id="rsuListed"><option value="no">No / foreign or unlisted</option><option value="yes">Yes, NSE/BSE listed</option></select></div></div><div class="actions"><button class="primary" data-calc-btn onclick="calcRsu()">Calculate RSU tax</button></div></div>`,
+`<div id="rsuResult" class="result-grid"></div><table id="rsuTable"></table>`,
+`<p class="sub">Salary tax on vesting is calculated as the extra tax caused by adding the vesting value to annual salary. Sale tax is calculated separately as capital gains.</p>`]
+,sip:[
+`<div class="calc-form"><div class="grid2"><div class="field"><label>Monthly SIP amount (Rs)</label><input id="sipAmt" data-required type="number" value="10000" min="1"></div><div class="field"><label>Expected annual return (% CAGR)</label><input id="sipRate" data-required type="number" value="12" min="0"></div><div class="field"><label>Investment period (Years)</label><input id="sipYears" data-required type="number" value="10" min="1"></div></div><div class="actions"><button class="primary" data-calc-btn onclick="calcSip(false)">Calculate SIP</button></div></div>`,
+`<div id="sipResult" class="result-grid"></div><table id="sipTable"></table>`,investmentNote()]
+,stepSip:[
+`<div class="calc-form"><div class="grid2"><div class="field"><label>Starting monthly SIP (Rs)</label><input id="stepAmt" data-required type="number" value="10000" min="1"></div><div class="field"><label>Expected annual return (% CAGR)</label><input id="stepRate" data-required type="number" value="12" min="0"></div><div class="field"><label>Investment period (Years)</label><input id="stepYears" data-required type="number" value="10" min="1"></div><div class="field"><label>Annual step-up (%)</label><input id="stepUp" data-required type="number" value="10" min="0"></div></div><div class="actions"><button class="primary" data-calc-btn onclick="calcSip(true)">Calculate step-up SIP</button></div></div>`,
+`<div id="stepSipResult" class="result-grid"></div><table id="stepSipTable"></table>`,investmentNote()]
+,lumpsum:[
+`<div class="calc-form"><div class="grid2"><div class="field"><label>Initial investment (Rs)</label><input id="lumpAmt" data-required type="number" value="500000" min="1"></div><div class="field"><label>Expected annual return (% CAGR)</label><input id="lumpRate" data-required type="number" value="12" min="0"></div><div class="field"><label>Investment period (Years)</label><input id="lumpYears" data-required type="number" value="10" min="1"></div></div><div class="actions"><button class="primary" data-calc-btn onclick="calcLumpsum()">Calculate lumpsum</button></div></div>`,
+`<div id="lumpsumResult" class="result-grid"></div><table id="lumpsumTable"></table>`,investmentNote()]
+,swp:[
+`<div class="calc-form"><div class="grid2"><div class="field"><label>Total investment (Rs)</label><input id="swpCorpus" data-required type="number" value="2500000" min="1"></div><div class="field"><label>Monthly withdrawal (Rs)</label><input id="swpWithdrawal" data-required type="number" value="20000" min="0"></div><div class="field"><label>Expected annual return (%)</label><input id="swpRate" data-required type="number" value="8" min="0"></div><div class="field"><label>Withdrawal period (Years)</label><input id="swpYears" data-required type="number" value="10" min="1"></div></div><div class="actions"><button class="primary" data-calc-btn onclick="calcSwp()">Calculate SWP</button></div></div>`,
+`<div id="swpResult" class="result-grid"></div><table id="swpTable"></table>`,investmentNote()]
+,xirr:[
+`<div class="calc-form"><p class="sub">Add what you invested and what you later received. Enter positive amounts; Vault Finance handles the signs.</p><div id="cashflows"><div class="cashflow"><div class="field"><label>Date</label><input type="date" data-required data-cf-date value="2024-01-01"></div><div class="field"><label>Transaction type</label><select data-required data-cf-type><option value="invest">Invested</option><option value="withdraw">Withdrawn</option><option value="current">Current value</option></select></div><div class="field"><label>Amount (Rs)</label><input type="number" data-required data-cf-amount value="500000" min="1"></div><button class="icon-btn remove-cf" type="button" title="Remove transaction" aria-label="Remove transaction" onclick="removeCashflow(this)">&#215;</button></div><div class="cashflow"><div class="field"><label>Date</label><input type="date" data-required data-cf-date value="2026-06-30"></div><div class="field"><label>Transaction type</label><select data-required data-cf-type><option value="invest">Invested</option><option value="withdraw">Withdrawn</option><option value="current" selected>Current value</option></select></div><div class="field"><label>Amount (Rs)</label><input type="number" data-required data-cf-amount value="750000" min="1"></div><button class="icon-btn remove-cf" type="button" title="Remove transaction" aria-label="Remove transaction" onclick="removeCashflow(this)">&#215;</button></div></div><div id="xirrError" class="form-error" role="alert" aria-live="polite"></div><div class="actions"><button class="ghost" type="button" onclick="addCashflow()">Add transaction</button><button class="primary" data-calc-btn onclick="calcXirr()">Calculate annualised return</button></div></div>`,
+`<div id="xirrResult" class="result-grid"></div><div id="xirrInterpretation"></div><div id="xirrTimeline" class="timeline"></div><table id="xirrTable"></table>`,`<p class="sub"><strong>What XIRR means:</strong> it is the annualised return calculated using the exact date of every investment and receipt. Use Current value for an investment you still hold, or Withdrawn for money already received.</p>`]
+,ppf:[
+`<div class="calc-form"><div class="grid2"><div class="field"><label>Yearly investment (Rs)</label><input id="ppfAmt" data-required type="number" value="150000" min="1"></div><div class="field"><label>Interest rate (%)</label><input id="ppfRate" data-required type="number" value="7.1" min="0"></div><div class="field"><label>Investment period (Years)</label><input id="ppfYears" data-required type="number" value="15" min="1"></div></div><div class="actions"><button class="primary" data-calc-btn onclick="calcPpf()">Calculate PPF</button></div></div>`,
+`<div id="ppfResult" class="result-grid"></div><table id="ppfTable"></table>`,`<p class="sub">Uses annual contributions and annual compounding. Actual PPF interest depends on contribution timing and notified rates.</p>`]
+,fd:[
+`<div class="calc-form"><div class="grid2"><div class="field"><label>Deposit amount (Rs)</label><input id="fdAmt" data-required type="number" value="500000" min="1"></div><div class="field"><label>Annual interest rate (%)</label><input id="fdRate" data-required type="number" value="7.25" min="0"></div><div class="field"><label>Tenure value</label><input id="fdTenure" data-required type="number" value="3" min="1"></div><div class="field"><label>Tenure unit</label><select id="fdUnit"><option value="years">Years</option><option value="months">Months</option></select></div><div class="field"><label>Compounding frequency</label><select id="fdFreq"><option value="4">Quarterly</option><option value="12">Monthly</option><option value="2">Half-yearly</option><option value="1">Annual</option></select></div></div><div class="actions"><button class="primary" data-calc-btn onclick="calcFd()">Calculate FD</button></div></div>`,
+`<div id="fdResult" class="result-grid"></div><table id="fdTable"></table>`,`<p class="sub">Post-tax value assumes 30% tax on interest for illustration. TDS and actual slab tax may differ.</p>`]
+,rd:[
+`<div class="calc-form"><div class="grid2"><div class="field"><label>Monthly deposit (Rs)</label><input id="rdAmt" data-required type="number" value="10000" min="1"></div><div class="field"><label>Annual interest rate (%)</label><input id="rdRate" data-required type="number" value="7" min="0"></div><div class="field"><label>Tenure value</label><input id="rdTenure" data-required type="number" value="5" min="1"></div><div class="field"><label>Tenure unit</label><select id="rdUnit"><option value="years">Years</option><option value="months">Months</option></select></div></div><div class="actions"><button class="primary" data-calc-btn onclick="calcRd()">Calculate RD</button></div></div>`,
+`<div id="rdResult" class="result-grid"></div><table id="rdTable"></table>`,`<p class="sub">Uses monthly deposits and a simplified monthly compounding estimate. Post-tax value assumes 30% tax on interest.</p>`]
+,emi:[
+`<div class="calc-form"><div class="grid2"><div class="field"><label>Loan amount (Rs)</label><input id="emiAmt" data-required type="number" value="5000000" min="1"></div><div class="field"><label>Annual interest rate (%)</label><input id="emiRate" data-required type="number" value="8.5" min="0"></div><div class="field"><label>Loan tenure (Years)</label><input id="emiYears" data-required type="number" value="20" min="1"></div></div><div class="actions"><button class="primary" data-calc-btn onclick="calcEmi()">Calculate EMI</button></div></div>`,
+`<div id="emiResult" class="result-grid"></div><table id="emiTable"></table>`,`<p class="sub">Assumes a constant interest rate and monthly reducing-balance repayments.</p>`]
+,gst:[
+`<div class="calc-form"><div class="grid2"><div class="field"><label>Amount (Rs)</label><input id="gstAmt" data-required type="number" value="10000" min="0"></div><div class="field"><label>GST rate (%)</label><input id="gstRate" data-required type="number" value="18" min="0"></div><div class="field"><label>GST mode</label><select id="gstMode"><option value="add">Add GST</option><option value="remove">Remove GST</option></select></div></div><div class="actions"><button class="primary" data-calc-btn onclick="calcGst()">Calculate GST</button></div></div>`,
+`<div id="gstResult" class="result-grid"></div><table id="gstTable"></table>`,`<p class="sub">Add mode treats the entered amount as the base. Remove mode treats it as GST-inclusive.</p>`]
+};
+
+let activeCategory='Taxes';
+let selectedToolId='income';
+const toolCategories=['Taxes','Investments','Banking','Loans','Retirement','Salary'];
+function renderTools(){
+  renderPickerCategories();
+  renderPickerTools('');
+  selectTool('income');
+}
+function renderPickerCategories(){
+  setHTML('pickerCategories',toolCategories.map(category=>`<button class="picker-category ${category===activeCategory?'active':''}" data-category="${category}">${category}</button>`).join(''));
+  document.querySelectorAll('.picker-category').forEach(button=>button.addEventListener('click',()=>{
+    activeCategory=button.dataset.category;
+    document.getElementById('pickerSearch').value='';
+    renderPickerCategories();
+    renderPickerTools('');
+  }));
+}
+function renderPickerTools(query=''){
+  const q=query.trim().toLowerCase();
+  const filtered=toolsV2.filter(t=>q?`${t.title} ${t.desc} ${t.category}`.toLowerCase().includes(q):t.category===activeCategory);
+  setHTML('pickerTools',filtered.length?filtered.map(t=>`<button class="picker-tool ${t.id===selectedToolId?'active':''}" data-tool="${t.id}"><span class="picker-tool-icon">${t.icon}</span><strong>${t.title}</strong><span>${t.category} &middot; ${t.short}</span></button>`).join(''):`<div class="empty-search">No calculators match that search.</div>`);
+  document.querySelectorAll('.picker-tool').forEach(button=>button.addEventListener('click',()=>{selectTool(button.dataset.tool);closeCalculatorPicker();openPanel('calculators')}));
+}
+function openCalculatorPicker(){
+  renderPickerCategories();
+  renderPickerTools(document.getElementById('pickerSearch').value);
+  document.getElementById('calculatorPicker').hidden=false;
+  document.body.classList.add('modal-open');
+  setTimeout(()=>document.getElementById('pickerSearch').focus(),0);
+}
+function openCategoryPicker(category){
+  activeCategory=category;
+  document.getElementById('pickerSearch').value='';
+  openCalculatorPicker();
+}
+function openCalculatorTool(id){
+  selectTool(id);
+  openPanel('calculators');
+}
+function closeCalculatorPicker(){
+  document.getElementById('calculatorPicker').hidden=true;
+  document.body.classList.remove('modal-open');
+  document.getElementById('pickerSearch').value='';
+}
+function pickerBackdropClick(event){
+  if(event.target.id==='calculatorPicker')closeCalculatorPicker();
+}
+function selectTool(id){
+  const t=toolsV2.find(x=>x.id===id);
+  if(!t)return;
+  selectedToolId=id;
+  activeCategory=t.category;
+  document.querySelectorAll('.picker-tool').forEach(b=>b.classList.toggle('active',b.dataset.tool===id));
+  setHTML('toolTitle',t.title); setHTML('toolDesc',t.desc);
+  document.getElementById('calculatorPermalink').href=`/vault/calculators/${contentSlug(t.title)}/`;
+  setHTML('subTabs',t.tabs.map((name,i)=>`<button class="sub-tab ${i===0?'active':''}" data-pane="${i}">${name}</button>`).join(''));
+  setHTML('toolPanes',paneHTMLV2[id].map((html,i)=>`<div class="tab-pane ${i===0?'active':''}" data-pane="${i}">${html}</div>`).join(''));
+  document.querySelectorAll('.sub-tab').forEach(b=>b.addEventListener('click',()=>{
+    document.querySelectorAll('.sub-tab').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.tab-pane').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active'); document.querySelector(`.tab-pane[data-pane="${b.dataset.pane}"]`).classList.add('active');
+  }));
+  wireFormValidation();
+}
+
+function calcIncome(){
+  if(!visibleFormReady()) return;
+  const gross=val('incGross'), salaried=choice('incType')==='salaried', reg=choice('incRegime');
+  const std=salaried?(reg==='new'?75000:50000):0, ded=reg==='old'?val('incDed'):0;
+  const taxable=Math.max(gross-std-ded,0), tax=taxByRegime(taxable,reg);
+  setHTML('incomeResult', metric('Taxable income',rupee(taxable))+metric('Estimated tax',rupee(tax),'warn')+metric('Monthly TDS guide',rupee(tax/12)));
+  setHTML('incomeTable','<tr><th>Component</th><th class="numcol">Amount</th></tr>'+rows({'Gross income':gross,'Standard deduction':std,'Other deduction':ded,'Taxable income':taxable,'Tax incl. cess':tax}));
+  activatePane(1);
+}
+function calcCompare(){
+  if(!visibleFormReady()) return;
+  const gross=val('cmpGross'), salaried=choice('cmpType')==='salaried';
+  const oldStd=salaried?50000:0, newStd=salaried?75000:0;
+  const oldDed=Math.min(val('cmp80c'),150000)+Math.min(val('cmp80d'),100000)+val('cmpHra')+Math.min(val('cmpHome'),200000)+Math.min(val('cmpNps'),50000)+val('cmpOther')+oldStd;
+  const oldTaxable=Math.max(gross-oldDed,0), newTaxable=Math.max(gross-newStd,0);
+  const oldTax=taxByRegime(oldTaxable,'old'), newTax=taxByRegime(newTaxable,'new');
+  const winner=oldTax<newTax?'Old regime':newTax<oldTax?'New regime':'Both equal';
+  setHTML('compareResult',metric('Recommended',winner,'good')+metric('Old tax',rupee(oldTax))+metric('New tax',rupee(newTax))+metric('Savings',rupee(Math.abs(oldTax-newTax)),'warn'));
+  setHTML('compareTable','<tr><th>Component</th><th class="numcol">Old</th><th class="numcol">New</th></tr>'+`<tr><td>Taxable income</td><td class="numcol">${rupee(oldTaxable)}</td><td class="numcol">${rupee(newTaxable)}</td></tr><tr><td>Tax incl. cess</td><td class="numcol">${rupee(oldTax)}</td><td class="numcol">${rupee(newTax)}</td></tr>`);
+  activatePane(1);
+}
+function calcSalary(){
+  if(!visibleFormReady()) return;
+  const ctc=val('salCtc'), bonus=val('salBonus'), basic=val('salBasic'), pt=val('salPt'), regime=choice('salRegime');
+  const empPf=basic*(val('salEmpPfPct')/100), erpf=basic*(val('salErPfPct')/100), oldDed=val('salOldDed');
+  const taxableAnnualGross=Math.max(ctc-(erpf*12),0);
+  const taxInfo=incomeTaxDetails(taxableAnnualGross, regime, true, oldDed);
+  const tds=taxInfo.tax/12;
+  const fixedAnnual=Math.max(ctc-bonus-(erpf*12),0), grossMonthly=fixedAnnual/12;
+  const deductions=empPf+pt+tds, take=grossMonthly-deductions;
+  setHTML('salaryResult',metric('Monthly gross',rupee(grossMonthly))+metric('Monthly TDS calculated',rupee(tds),'warn')+metric('Estimated in-hand',rupee(take),'good'));
+  setHTML('salaryTable','<tr><th>Component</th><th class="numcol">Monthly</th></tr>'+rows({'Gross monthly pay':grossMonthly,'Employee PF calculated':empPf,'Professional tax':pt,'Income tax / TDS calculated':tds,'Take-home salary':take})+'<tr><th>Annual tax view</th><th class="numcol">Amount</th></tr>'+rows({'Annual taxable gross':taxableAnnualGross,'Taxable income after deductions':taxInfo.taxable,'Annual tax incl. cess':taxInfo.tax,'Employer PF inside CTC':erpf*12}));
+  activatePane(1);
+}
+function calcHra(){
+  if(!visibleFormReady()) return;
+  const salary=val('hraBasic')+val('hraDa'), hra=val('hraReceived'), rent=val('hraRent'), pct=choice('hraMetro')==='metro'?.5:.4;
+  const rentMinus=Math.max(rent-(salary*.1),0), cityLimit=salary*pct, exempt=Math.min(hra,rentMinus,cityLimit), taxable=Math.max(hra-exempt,0);
+  setHTML('hraResult',metric('HRA exemption',rupee(exempt),'good')+metric('Taxable HRA',rupee(taxable),'warn')+metric('City salary limit',rupee(cityLimit)));
+  setHTML('hraTable','<tr><th>Test</th><th class="numcol">Amount</th></tr>'+rows({'Actual HRA received':hra,'Rent minus 10% salary':rentMinus,'City percentage limit':cityLimit,'Least amount exempt':exempt}));
+  activatePane(1);
+}
+function calcGains(){
+  if(!visibleFormReady()) return;
+  const type=choice('gainType'), gain=Math.max(val('gainSale')-val('gainCost')-val('gainExpense'),0), months=monthsBetween(choice('gainBuyDate'),choice('gainSaleDate'));
+  let threshold=12, label='Short-term', tax=0, rateText='Slab / special rate';
+  if(type==='property'||type==='unlisted') threshold=24;
+  const isLong=months>threshold; label=isLong?'Long-term':'Short-term';
+  if(type==='listed'){ tax=isLong?Math.max(gain-125000,0)*.125:gain*.20; rateText=isLong?'12.5% after Rs 1.25L exemption':'20%'; }
+  else if(type==='property'){ tax=isLong?gain*.125:gain*.30; rateText=isLong?'12.5% simplified':'Assumed 30% slab'; }
+  else if(type==='unlisted'){ tax=isLong?gain*.125:gain*.30; rateText=isLong?'12.5% simplified':'Assumed 30% slab'; }
+  else { tax=isLong?gain*.125:gain*.30; rateText=isLong?'12.5% simplified':'Assumed 30% slab'; }
+  tax=Math.round(tax*1.04);
+  setHTML('gainsResult',metric('Capital gain',rupee(gain))+metric('Holding',label)+metric('Estimated tax',rupee(tax),'warn'));
+  setHTML('gainsTable','<tr><th>Component</th><th class="numcol">Value</th></tr>'+rows({'Holding period':{value:months,type:'months'},'Tax rate used':{value:rateText,type:'text'},'Gain':gain,'Tax incl. cess':tax}));
+  activatePane(1);
+}
+function calc80C(){
+  if(!visibleFormReady()) return;
+  const data={'EPF':val('c80cEpf'),'ELSS':val('c80cElss'),'PPF':val('c80cPpf'),'Life insurance':val('c80cLife'),'Home loan principal':val('c80cHome'),'Tuition fees':val('c80cTuition')};
+  const total=Object.values(data).reduce((a,b)=>a+b,0), eligible=Math.min(total,150000), gap=Math.max(150000-total,0);
+  setHTML('c80cResult',metric('Entered total',rupee(total))+metric('Eligible deduction',rupee(eligible),'good')+metric('Gap to cap',rupee(gap),'warn'));
+  setHTML('c80cTable','<tr><th>Instrument</th><th class="numcol">Amount</th></tr>'+rows(data)+rows({'Eligible after cap':eligible}));
+  activatePane(1);
+}
+function calcNps(){
+  if(!visibleFormReady()) return;
+  const income=val('npsIncome'), sal=val('npsSalary'), own=val('npsOwn'), employer=val('npsEmployer'), regime=choice('npsRegime'), otherDed=val('npsOtherDed');
+  const extra=regime==='old' ? Math.min(own,50000) : 0;
+  const employerCap=Math.min(employer,sal*.14);
+  const without=incomeTaxDetails(income, regime, true, regime==='old'?otherDed:0);
+  const withNps=incomeTaxDetails(Math.max(income-employerCap,0), regime, true, regime==='old'?otherDed+extra:0);
+  const benefit=Math.max(without.tax-withNps.tax,0);
+  setHTML('npsResult',metric('Tax saved calculated',rupee(benefit),'good')+metric('80CCD(1B) eligible',rupee(extra))+metric('Employer NPS used',rupee(employerCap),'warn'));
+  setHTML('npsTable','<tr><th>Component</th><th class="numcol">Amount</th></tr>'+rows({'Tax before NPS':without.tax,'Tax after NPS':withNps.tax,'Tax benefit calculated':benefit,'Own contribution':own,'80CCD(1B) used':extra,'Employer contribution':employer,'Employer cap used':employerCap}));
+  activatePane(1);
+}
+function calcGratuity(){
+  if(!visibleFormReady()) return;
+  const basic=val('graBasic'), years=Math.floor(val('graYears')), actual=val('graActual'), covered=choice('graCovered')==='yes';
+  const formula=covered?(15/26)*basic*years:(.5)*basic*years, cap=2000000, exempt=Math.min(actual,formula,cap), taxable=Math.max(actual-exempt,0);
+  setHTML('gratuityResult',metric('Formula estimate',rupee(formula))+metric('Tax-exempt amount',rupee(exempt),'good')+metric('Taxable gratuity',rupee(taxable),'warn'));
+  setHTML('gratuityTable','<tr><th>Component</th><th class="numcol">Value</th></tr>'+rows({'Completed service':{value:years,type:'years'},'Formula amount':formula,'Statutory cap used':cap,'Actual received':actual,'Exempt':exempt,'Taxable':taxable}));
+  activatePane(1);
+}
+function calcEpf(){
+  if(!visibleFormReady()) return;
+  let balance=val('epfBalance'), basic=val('epfBasic'), years=Math.max(1,Math.floor(val('epfYears'))), rowsHtml='';
+  const empPct=val('epfEmpPct')/100, erPct=val('epfErPct')/100, growth=val('epfGrowth')/100, rate=val('epfRate')/100;
+  for(let y=1;y<=years;y++){ const contrib=basic*12*(empPct+erPct); balance=(balance+contrib)*(1+rate); rowsHtml+=`<tr><td>Year ${y}</td><td class="numcol">${rupee(contrib)}</td><td class="numcol">${rupee(balance)}</td></tr>`; basic*=1+growth; }
+  setHTML('epfResult',metric('Projected maturity',rupee(balance),'good')+metric('Projection period',formatYears(years))+metric('Current monthly basic',rupee(val('epfBasic'))));
+  setHTML('epfTable','<tr><th>Year</th><th class="numcol">Contribution</th><th class="numcol">Closing balance</th></tr>'+rowsHtml);
+  activatePane(1);
+}
+function calcRsu(){
+  if(!visibleFormReady()) return;
+  const salary=val('rsuSalary'), regime=choice('rsuRegime'), oldDed=val('rsuOldDed');
+  const vest=val('rsuVestShares')*val('rsuVestPrice');
+  const before=incomeTaxDetails(salary, regime, true, oldDed);
+  const after=incomeTaxDetails(salary+vest, regime, true, oldDed);
+  const salTax=Math.max(after.tax-before.tax,0);
+  const gain=Math.max((val('rsuSalePrice')-val('rsuVestPrice'))*val('rsuSaleShares'),0), listed=choice('rsuListed')==='yes', months=val('rsuMonths');
+  const long=months>(listed?12:24); const capTax=(listed?(long?Math.max(gain-125000,0)*.125:gain*.20):(long?gain*.125:gain*.30))*1.04;
+  const fa=choice('rsuCompany')==='foreign'?'Schedule FA likely required':'No foreign asset flag from company type';
+  setHTML('rsuResult',metric('Vesting perquisite',rupee(vest))+metric('Salary tax estimate',rupee(salTax),'warn')+metric('Sale gains tax',rupee(capTax),'warn')+metric('Reporting',fa,'good'));
+  setHTML('rsuTable','<tr><th>Component</th><th class="numcol">Value</th></tr>'+rows({'Salary tax before vesting':before.tax,'Salary tax after vesting':after.tax,'Vesting value added to salary':vest,'Incremental salary tax on vesting':salTax,'Capital gain on sale':gain,'Holding treatment':long?'Long-term':'Short-term','Estimated gains tax':capTax}));
+  activatePane(1);
+}
+function investmentOutput(prefix,invested,corpus){
+  const gain=Math.max(corpus-invested,0), tax=gain*.125, after=corpus-tax;
+  setHTML(prefix+'Result',metric('Estimated corpus after tax',formatMoney(after),'good')+metric('Estimated gain',formatMoney(gain))+metric('Estimated tax',formatMoney(tax),'warn'));
+  setHTML(prefix+'Table','<tr><th>Component</th><th class="numcol">Amount</th></tr>'+rows({'Total invested':invested,'Estimated corpus before tax':corpus,'Estimated gain before tax':gain,'Estimated tax':tax,'Estimated corpus after tax':after}));
+  activatePane(1);
+}
+function calcSip(stepUp){
+  if(!visibleFormReady())return;
+  const p=val(stepUp?'stepAmt':'sipAmt'), rate=val(stepUp?'stepRate':'sipRate')/1200, years=Math.floor(val(stepUp?'stepYears':'sipYears')), step=stepUp?val('stepUp')/100:0;
+  let corpus=0,invested=0,monthly=p;
+  for(let m=0;m<years*12;m++){if(m&&m%12===0)monthly*=1+step;corpus=(corpus+monthly)*(1+rate);invested+=monthly;}
+  investmentOutput(stepUp?'stepSip':'sip',invested,corpus);
+}
+function calcLumpsum(){if(!visibleFormReady())return;const p=val('lumpAmt'),years=val('lumpYears'),corpus=p*Math.pow(1+val('lumpRate')/100,years);investmentOutput('lumpsum',p,corpus)}
+function calcSwp(){
+  if(!visibleFormReady())return;
+  const initial=val('swpCorpus'),withdrawal=val('swpWithdrawal'),months=Math.floor(val('swpYears')*12),r=val('swpRate')/1200;
+  let corpus=initial,total=0,survived=true;
+  for(let m=0;m<months;m++){corpus*=1+r;if(corpus<withdrawal){total+=corpus;corpus=0;survived=false;break}corpus-=withdrawal;total+=withdrawal}
+  const gain=Math.max(corpus+total-initial,0),tax=gain*.125,after=Math.max(corpus-tax,0);
+  setHTML('swpResult',metric('Remaining after tax',formatMoney(after),'good')+metric('Total withdrawn',formatMoney(total))+metric('Corpus survives?',survived?'Yes':'No',survived?'good':'warn'));
+  setHTML('swpTable','<tr><th>Component</th><th class="numcol">Value</th></tr>'+rows({'Total withdrawn':total,'Remaining corpus before tax':corpus,'Estimated gain / tax impact':tax,'Remaining corpus after tax':after,'Selected period':{value:val('swpYears'),type:'years'},'Corpus survives':{value:survived?'Yes':'No',type:'text'}}));activatePane(1);
+}
+function addCashflow(){
+  document.getElementById('cashflows').insertAdjacentHTML('beforeend',`<div class="cashflow"><div class="field"><label>Date</label><input type="date" data-required data-cf-date value="2026-07-01"></div><div class="field"><label>Transaction type</label><select data-required data-cf-type><option value="invest">Invested</option><option value="withdraw" selected>Withdrawn</option><option value="current">Current value</option></select></div><div class="field"><label>Amount (Rs)</label><input type="number" data-required data-cf-amount value="100000" min="1"></div><button class="icon-btn remove-cf" type="button" title="Remove transaction" aria-label="Remove transaction" onclick="removeCashflow(this)">&#215;</button></div>`);
+  wireFormValidation();
+}
+function removeCashflow(button){
+  const cashflows=document.querySelectorAll('.cashflow');
+  if(cashflows.length<=2){showXirrError('Keep at least two transactions: one investment and one withdrawal or current value.');return}
+  button.closest('.cashflow').remove();
+  showXirrError('');
+  wireFormValidation();
+}
+function showXirrError(message){
+  const box=document.getElementById('xirrError');
+  if(!box)return;
+  box.textContent=message;
+  box.classList.toggle('show',Boolean(message));
+}
+function formatInvestmentDuration(months){
+  const years=Math.floor(months/12),remaining=months%12,parts=[];
+  if(years)parts.push(`${years} ${years===1?'Year':'Years'}`);
+  if(remaining||!parts.length)parts.push(`${remaining} ${remaining===1?'Month':'Months'}`);
+  return parts.join(' ');
+}
+function calcXirr(){
+  showXirrError('');
+  const transactions=[...document.querySelectorAll('.cashflow')].map(row=>{
+    const type=row.querySelector('[data-cf-type]').value;
+    const rawAmount=Number(row.querySelector('[data-cf-amount]').value);
+    const date=new Date(row.querySelector('[data-cf-date]').value);
+    return {date,type,rawAmount,amount:type==='invest'?-rawAmount:rawAmount};
+  }).sort((a,b)=>a.date-b.date);
+  if(transactions.length<2||transactions.some(x=>Number.isNaN(x.date.getTime())||!Number.isFinite(x.rawAmount)||x.rawAmount<=0)){
+    showXirrError('Enter a valid date and a positive amount for every transaction.');return;
+  }
+  if(!transactions.some(x=>x.type==='invest')||!transactions.some(x=>x.type==='withdraw'||x.type==='current')){
+    showXirrError('Add at least one Invested transaction and one Withdrawn or Current value transaction.');return;
+  }
+  const d0=transactions[0].date,dLast=transactions[transactions.length-1].date;
+  if(d0.getTime()===dLast.getTime()){showXirrError('Transactions must span more than one date to calculate an annualised return.');return}
+  const npv=rate=>transactions.reduce((sum,x)=>sum+x.amount/Math.pow(1+rate,(x.date-d0)/31557600000),0);
+  let lo=-.9999,hi=1000,loValue=npv(lo),hiValue=npv(hi);
+  if(!Number.isFinite(loValue)||!Number.isFinite(hiValue)||loValue*hiValue>0){
+    showXirrError('These transactions do not produce a reliable annualised return. Check the transaction types and amounts.');return;
+  }
+  for(let i=0;i<180;i++){const mid=(lo+hi)/2,midValue=npv(mid);if(loValue*midValue<=0){hi=mid}else{lo=mid;loValue=midValue}}
+  const rate=(lo+hi)/2,invested=transactions.filter(x=>x.type==='invest').reduce((sum,x)=>sum+x.rawAmount,0);
+  const received=transactions.filter(x=>x.type!=='invest').reduce((sum,x)=>sum+x.rawAmount,0),gain=received-invested;
+  const durationMonths=monthsBetween(d0.toISOString().slice(0,10),dLast.toISOString().slice(0,10)),duration=formatInvestmentDuration(durationMonths);
+  const direction=rate>=0?'earned':'lost',interpretation=`Your investment ${direction} approximately ${formatPercent(Math.abs(rate*100))} per year over ${duration}.`;
+  setHTML('xirrResult',metric('Annualised return',formatPercent(rate*100),rate>=0?'good':'warn')+metric('Net gain / loss',formatMoney(gain),gain>=0?'good':'warn')+metric('Investment duration',duration));
+  setHTML('xirrInterpretation',`<div class="interpretation"><strong>What this means</strong><br>${interpretation}</div>`);
+  setHTML('xirrTimeline',transactions.map(x=>`<div class="timeline-item ${x.type==='invest'?'invest':''}"><span class="timeline-date">${x.date.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})}</span><span class="timeline-dot"></span><span class="timeline-type">${x.type==='invest'?'Invested':x.type==='withdraw'?'Withdrawn':'Current value'}</span><strong>${formatMoney(x.rawAmount)}</strong></div>`).join(''));
+  setHTML('xirrTable','<tr><th>Component</th><th class="numcol">Value</th></tr>'+rows({'Annualised return':{value:rate*100,type:'percent'},'Total invested':invested,'Money received / current value':received,'Net gain / loss':gain,'Investment duration':{value:duration,type:'text'},'Transaction count':{value:transactions.length,type:'number'}}));
+  activatePane(1);
+}
+function calcPpf(){if(!visibleFormReady())return;const amt=val('ppfAmt'),rate=val('ppfRate')/100,years=Math.floor(val('ppfYears'));let corpus=0;for(let y=0;y<years;y++)corpus=(corpus+amt)*(1+rate);const invested=amt*years;setHTML('ppfResult',metric('Maturity value',formatMoney(corpus),'good')+metric('Interest earned',formatMoney(corpus-invested)));setHTML('ppfTable','<tr><th>Component</th><th class="numcol">Value</th></tr>'+rows({'Investment period':{value:years,type:'years'},'Total invested':invested,'Interest earned':corpus-invested,'Maturity value':corpus}));activatePane(1)}
+function calcFd(){if(!visibleFormReady())return;const p=val('fdAmt'),r=val('fdRate')/100,f=Number(choice('fdFreq')),raw=val('fdTenure'),years=choice('fdUnit')==='months'?raw/12:raw,maturity=p*Math.pow(1+r/f,f*years),interest=maturity-p,post=maturity-interest*.30;setHTML('fdResult',metric('Maturity amount',formatMoney(maturity),'good')+metric('Post-tax maturity',formatMoney(post)));setHTML('fdTable','<tr><th>Component</th><th class="numcol">Value</th></tr>'+rows({'Tenure':{value:raw,type:choice('fdUnit')},'Interest earned':interest,'Maturity amount':maturity,'Post-tax maturity amount':post}));activatePane(1)}
+function calcRd(){if(!visibleFormReady())return;const p=val('rdAmt'),months=Math.floor(choice('rdUnit')==='years'?val('rdTenure')*12:val('rdTenure')),r=val('rdRate')/1200;let corpus=0;for(let m=0;m<months;m++)corpus=(corpus+p)*(1+r);const invested=p*months,interest=corpus-invested,post=corpus-interest*.30;setHTML('rdResult',metric('Maturity amount',formatMoney(corpus),'good')+metric('Post-tax maturity',formatMoney(post)));setHTML('rdTable','<tr><th>Component</th><th class="numcol">Value</th></tr>'+rows({'Tenure':{value:months,type:'months'},'Total deposited':invested,'Interest earned':interest,'Maturity amount':corpus,'Post-tax maturity amount':post}));activatePane(1)}
+function calcEmi(){if(!visibleFormReady())return;const p=val('emiAmt'),r=val('emiRate')/1200,n=Math.floor(val('emiYears')*12),emi=r?p*r*Math.pow(1+r,n)/(Math.pow(1+r,n)-1):p/n,total=emi*n;setHTML('emiResult',metric('Monthly EMI',formatMoney(emi),'good')+metric('Total interest',formatMoney(total-p),'warn'));setHTML('emiTable','<tr><th>Component</th><th class="numcol">Value</th></tr>'+rows({'Loan tenure':{value:val('emiYears'),type:'years'},'Monthly EMI':emi,'Total interest':total-p,'Total payment':total}));activatePane(1)}
+function calcGst(){if(!visibleFormReady())return;const amount=val('gstAmt'),rate=val('gstRate')/100,remove=choice('gstMode')==='remove',base=remove?amount/(1+rate):amount,gst=remove?amount-base:amount*rate,final=base+gst;setHTML('gstResult',metric('Final amount',formatMoney(final),'good')+metric('GST amount',formatMoney(gst)));setHTML('gstTable','<tr><th>Component</th><th class="numcol">Value</th></tr>'+rows({'GST rate':{value:rate*100,type:'percent'},'Base amount':base,'GST amount':gst,'Final amount':final}));activatePane(1)}
+function selectITR(){
+  const income=choice('itrIncome'), foreign=choice('itrForeign'), crypto=choice('itrCrypto'), resident=choice('itrResident');
+  let form='ITR-1', reason='Salary or pension profile without complex items.';
+  if(resident==='nri'||foreign==='yes'||income==='capital'||crypto==='yes'){form='ITR-2'; reason='Capital gains, foreign assets/income, NRI status, or VDA reporting generally moves taxpayers out of ITR-1.'}
+  if(income==='businessp'){form='ITR-4'; reason='Presumptive business or profession income commonly uses ITR-4 when other conditions fit.'}
+  if(income==='business'){form='ITR-3'; reason='Regular business or profession income generally needs ITR-3.'}
+  setHTML('itrResult',metric('Likely form',form,'good')+metric('Reason',reason)+metric('Reminder','Verify portal eligibility'));
+}
+const readGroups={
+  'Income Tax':`Old vs New Tax Regime Explained (2026)|Which Tax Regime Should You Choose?|Income Tax Slabs Explained|What is Standard Deduction?|What is Taxable Income?|How Salary is Taxed in India|How Bonus is Taxed|Tax on Leave Encashment|Tax on Gratuity|Tax on Pension|How TDS Works|Form 16 Explained|Form 26AS Explained|AIS vs Form 26AS|TIS Explained|Advance Tax Explained|Self Assessment Tax Explained|Refund Status Explained|Interest under Sections 234A, 234B & 234C`.split('|'),
+  'ITR Filing':`Which ITR Form Should I File?|ITR-1 vs ITR-2 vs ITR-3|Documents Needed Before Filing ITR|Common ITR Filing Mistakes|How to Correct a Filed Return|Revised Return Explained|Belated Return Explained|Updated Return Explained|What Happens if You Miss Filing?|How Long Should You Keep Tax Documents?`.split('|'),
+  'Salary':`Understanding Your CTC|Why In-Hand Salary is Lower than CTC|Employer PF Explained|Employee PF Explained|HRA Explained|LTA Explained|Professional Tax Explained|Salary Structure Explained`.split('|'),
+  'Investments':`SIP vs Lumpsum|Step-Up SIP Explained|What is XIRR?|CAGR vs XIRR|What is SWP?|How Mutual Funds are Taxed|Debt Fund Taxation|Equity Taxation|ELSS Explained|Index Funds vs Active Funds|PPF Explained|EPF Explained|NPS Explained|FD vs PPF|FD vs Debt Fund|Gold ETF vs Physical Gold|Emergency Fund Guide|Asset Allocation Explained`.split('|'),
+  'Capital Gains':`STCG vs LTCG|Holding Period Rules|Tax on Shares|Tax on Mutual Funds|Tax on Property Sale|Indexation Explained|Capital Loss Set-Off|Carry Forward Losses|Tax Harvesting Explained`.split('|'),
+  'RSUs & ESOPs':`RSU Taxation Explained|ESOP vs RSU|Foreign RSU Tax Guide|Schedule FA Explained|Double Taxation Relief|Selling RSUs|Cost Basis Explained|FMV Explained`.split('|'),
+  'Banking':`Fixed Deposit Guide|Recurring Deposit Guide|Bank FD vs Post Office|FD Premature Withdrawal|Senior Citizen FD Benefits|Bank Deposit Insurance (DICGC)`.split('|'),
+  'Retirement':`How Much Retirement Corpus Do You Need?|4% Withdrawal Rule|Building Passive Income|Safe Withdrawal Rate|EPF + PPF + NPS Strategy|Retirement Planning in Your 20s|Retirement Planning in Your 30s|Retirement Planning in Your 40s`.split('|'),
+  'Personal Finance':`50-30-20 Budget Rule|Emergency Fund Guide|Good Debt vs Bad Debt|How Credit Score Works|How Credit Cards Affect CIBIL|How to Become Financially Independent|Financial Planning Checklist|Insurance Checklist|Term Insurance Explained|Health Insurance Explained`.split('|')
+};
+const faqGroups={
+  'Income Tax':`Which tax regime is better?|Is the new regime mandatory?|Can I switch between regimes?|Do I need to file ITR if TDS is deducted?|Is bonus taxable?|Are gifts taxable?|Is gratuity taxable?|Is pension taxable?|Can I claim HRA?|Can I claim LTA?|How much income is tax-free?|What is rebate under Section 87A?|What is cess?|What is surcharge?|What happens if I don't file ITR?`.split('|'),
+  'Investments':`Is SIP guaranteed?|Is Step-Up SIP better?|SIP vs FD?|SIP vs PPF?|SIP vs NPS?|Which mutual fund should beginners choose?|How much should I invest monthly?|Can I stop SIP anytime?|What happens if I miss a SIP?|Is SWP taxable?|What is CAGR?|What is XIRR?`.split('|'),
+  'Capital Gains':`How are stocks taxed?|How are mutual funds taxed?|What is STCG?|What is LTCG?|When is capital gain calculated?|Can I offset losses?|How long can losses be carried forward?`.split('|'),
+  'Salary':`Why is my in-hand lower than CTC?|Does employer PF count as salary?|Is gratuity part of CTC?|Is HRA compulsory?|Can I claim HRA without rent receipts?`.split('|'),
+  'RSUs':`Are RSUs taxed twice?|When are RSUs taxed?|Do I need Schedule FA?|How do I report foreign RSUs?|Is TDS deducted on RSUs?|What if I don't sell my RSUs?`.split('|'),
+  'EPF / PPF / NPS':`Is EPF taxable?|Is PPF taxable?|Is NPS taxable?|Can I withdraw EPF?|Can I withdraw PPF early?|Which is better: PPF or EPF?|Can I have multiple PPF accounts?`.split('|'),
+  'Banking':`Is FD interest taxable?|Is RD interest taxable?|What is TDS on FD?|Can I break an FD?|Are bank deposits insured?`.split('|'),
+  'GST':`How do I calculate GST?|How do I remove GST?|What is CGST?|What is SGST?|What is IGST?`.split('|'),
+  'Loans':`What is EMI?|How is EMI calculated?|What is reducing balance?|Can I prepay my loan?|Does prepayment reduce EMI?`.split('|')
+};
+const faqAnswers={
+  'Which tax regime is better?':'The better regime depends on your income mix and eligible deductions. Compare both using the same income data each year before choosing.',
+  'Is the new regime mandatory?':'No. It is the default regime, but eligible taxpayers may opt for the old regime. Taxpayers with business or professional income face additional switching rules.',
+  'Can I switch between regimes?':'Most taxpayers without business income can generally choose each year. Taxpayers with business or professional income should review Form 10-IEA and switching restrictions.',
+  'Do I need to file ITR if TDS is deducted?':'TDS does not replace filing. You may still need to file based on income, assets, transactions, refund claims, or other statutory conditions.',
+  'Is bonus taxable?':'Yes. Employment bonus is normally taxed as salary in the year it becomes taxable, and the employer may deduct TDS.',
+  'Are gifts taxable?':'Some gifts can be taxable when aggregate value crosses the statutory threshold. Gifts from specified relatives and certain occasions are generally exempt, subject to conditions.',
+  'Is gratuity taxable?':'It depends on the employer type, coverage under gratuity law, amount received, and available exemption limits. Any excess exemption can be taxable as salary.',
+  'Is pension taxable?':'Regular pension is generally salary income. Family pension and commuted pension follow different rules and exemptions.',
+  'Can I claim HRA?':'HRA exemption is generally available under the old regime when eligible salary, rent, and residence conditions are met.',
+  'Can I claim LTA?':'Eligible employees may claim LTA under the old regime for qualifying domestic travel, subject to block-period and documentation rules.',
+  'How much income is tax-free?':'It depends on the regime, residential status, income type, and assessment year. For FY 2025-26, Section 87A can reduce eligible new-regime tax to zero up to the applicable threshold; special-rate income needs separate treatment.',
+  'What is rebate under Section 87A?':'It is a rebate for eligible resident individuals whose total income stays within the prescribed threshold. Limits differ between regimes and assessment years.',
+  'What is cess?':'Health and Education Cess is an additional levy on calculated income tax and surcharge. The commonly applied rate is 4%.',
+  'What is surcharge?':'Surcharge is additional tax for taxpayers whose income exceeds specified high-income thresholds. Marginal relief may apply.',
+  "What happens if I don't file ITR?":'Possible consequences include late fees, interest, loss carry-forward restrictions, notices, and delayed refunds. Available belated or updated-return routes depend on statutory time limits.',
+  'Is SIP guaranteed?':'No. SIP is only an investment method; returns depend on the underlying asset and market performance.',
+  'Is Step-Up SIP better?':'It can build a larger corpus by increasing contributions over time, but it is better only when the higher future contributions remain affordable.',
+  'SIP vs FD?':'SIPs can offer market-linked growth with volatility. FDs offer stated interest and capital stability but may deliver lower post-tax growth.',
+  'SIP vs PPF?':'A mutual-fund SIP is market-linked and liquid based on the scheme. PPF is government-backed, long-term, and subject to contribution and withdrawal rules.',
+  'SIP vs NPS?':'SIP is a contribution method available across mutual funds. NPS is a retirement product with regulated allocation, tax rules, and withdrawal restrictions.',
+  'Which mutual fund should beginners choose?':'There is no universal choice. Beginners commonly evaluate diversified, low-cost funds after considering risk capacity, time horizon, and asset allocation.',
+  'How much should I invest monthly?':'Start with the amount left after essential expenses, insurance, and emergency savings. Link the contribution to a specific goal and increase it as income grows.',
+  'Can I stop SIP anytime?':'Most open-ended mutual-fund SIP instructions can be stopped, though scheme exit loads, lock-ins, or platform processing timelines may apply.',
+  'What happens if I miss a SIP?':'The instalment usually fails and no units are purchased. Repeated failures may cancel the mandate and banks may charge return fees.',
+  'Is SWP taxable?':'Each SWP withdrawal is a redemption. The gain portion can be taxable based on fund type, holding period, and applicable capital-gains rules.',
+  'What is CAGR?':'CAGR is the constant annual growth rate that connects a beginning value to an ending value over a period. It assumes no intermediate cash flows.',
+  'What is XIRR?':'XIRR is an annualised return that accounts for the exact dates and amounts of multiple investments and withdrawals.',
+  'How are stocks taxed?':'Sale gains are generally classified as short-term or long-term based on holding period. Rates depend on listing, transaction conditions, and current law.',
+  'How are mutual funds taxed?':'Tax treatment depends on the fund asset mix, acquisition date, holding period, and whether the gain is short-term or long-term.',
+  'What is STCG?':'Short-term capital gain is gain from an asset sold within its prescribed short-term holding period.',
+  'What is LTCG?':'Long-term capital gain is gain from an asset held beyond the prescribed holding period. Exemptions and tax rates depend on asset type.',
+  'When is capital gain calculated?':'Capital gain is normally calculated on transfer or sale using consideration minus eligible cost and transfer expenses, with adjustments where law requires.',
+  'Can I offset losses?':'Eligible capital losses may be set off against permitted capital gains. Short-term and long-term losses have different set-off rules.',
+  'How long can losses be carried forward?':'Eligible capital losses can generally be carried forward for up to eight assessment years when the return is filed within the required timeline.',
+  'Why is my in-hand lower than CTC?':'CTC can include employer PF, gratuity, insurance, bonus, and other non-monthly components. Payroll then deducts employee PF, tax, and professional tax.',
+  'Does employer PF count as salary?':'Employer PF is usually part of CTC but is not paid as monthly cash. Tax treatment depends on contribution limits and applicable provident-fund rules.',
+  'Is gratuity part of CTC?':'Many employers include a projected gratuity cost in CTC, but payment occurs only when eligibility and service conditions are satisfied.',
+  'Is HRA compulsory?':'No. HRA is a salary-structure component decided by the employer; it is not mandatory for every employee.',
+  'Can I claim HRA without rent receipts?':'You must be able to substantiate rent payment. Employer payroll procedures and tax assessment documentation requirements can differ.',
+  'Are RSUs taxed twice?':'The same income is not normally taxed twice: vesting value is salary income, while only the later change from vesting cost basis is considered for capital gains.',
+  'When are RSUs taxed?':'RSUs are generally taxed as a salary perquisite when shares vest or are transferred, followed by capital-gains tax when shares are sold.',
+  'Do I need Schedule FA?':'Resident and ordinarily resident taxpayers may need Schedule FA for foreign shares or accounts. Reporting can apply even without a sale.',
+  'How do I report foreign RSUs?':'Report the vesting perquisite in salary and any sale in capital gains. Eligible taxpayers may also need foreign-asset and foreign-income schedules.',
+  'Is TDS deducted on RSUs?':'Employers commonly account for TDS on the taxable vesting perquisite, sometimes by withholding or selling shares. Check payroll and broker statements.',
+  "What if I don't sell my RSUs?":'Vesting tax can still arise even if shares are retained. Future price changes matter when the shares are eventually sold, and foreign-asset reporting may continue.',
+  'Is EPF taxable?':'EPF is generally tax-efficient, but employer contributions, high employee contributions, interest, and early withdrawals can trigger tax under specific rules.',
+  'Is PPF taxable?':'PPF contributions may qualify under Section 80C in the old regime, while interest and eligible maturity proceeds are generally exempt under current rules.',
+  'Is NPS taxable?':'NPS has contribution deductions subject to regime and section limits. Withdrawal, annuity, and employer-contribution treatment follow separate rules.',
+  'Can I withdraw EPF?':'Withdrawals are allowed in specified circumstances such as job separation, retirement, or approved partial-withdrawal purposes, subject to conditions.',
+  'Can I withdraw PPF early?':'PPF permits limited partial withdrawals and certain premature-closure cases after prescribed periods and subject to conditions.',
+  'Which is better: PPF or EPF?':'EPF is employment-linked retirement saving; PPF is voluntary long-term saving. The better fit depends on eligibility, liquidity, contribution capacity, and goals.',
+  'Can I have multiple PPF accounts?':'An individual generally cannot maintain multiple PPF accounts in their own name, apart from permitted guardian arrangements for minors.',
+  'Is FD interest taxable?':'Yes. FD interest is generally taxable as income from other sources at the applicable slab rate.',
+  'Is RD interest taxable?':'Yes. RD interest is generally taxable as income from other sources at the applicable slab rate.',
+  'What is TDS on FD?':'Banks may deduct TDS when interest crosses the applicable threshold. TDS is a tax credit, not necessarily the final tax liability.',
+  'Can I break an FD?':'Most callable FDs allow premature closure, often with a reduced interest rate or penalty. Non-callable deposits may not permit it.',
+  'Are bank deposits insured?':'Eligible deposits are insured by DICGC up to the statutory limit per depositor per bank, combining covered balances across branches.',
+  'How do I calculate GST?':'For an exclusive price, GST equals base amount multiplied by the GST rate. Add that tax to the base to get the final amount.',
+  'How do I remove GST?':'For a GST-inclusive amount, divide by one plus the GST rate to find the base, then subtract the base from the total.',
+  'What is CGST?':'CGST is the central component of GST generally charged on an intra-state supply.',
+  'What is SGST?':'SGST is the state component of GST generally charged alongside CGST on an intra-state supply.',
+  'What is IGST?':'IGST generally applies to inter-state supplies and imports, with settlement between the Centre and destination state.',
+  'What is EMI?':'EMI is the fixed periodic payment used to repay loan principal and interest over the agreed tenure.',
+  'How is EMI calculated?':'EMI uses the principal, periodic interest rate, and number of instalments under an amortisation formula.',
+  'What is reducing balance?':'Interest is calculated on the outstanding principal, so the interest portion generally falls as repayments reduce the balance.',
+  'Can I prepay my loan?':'Many loans allow part or full prepayment. Check lock-ins, charges, lender procedures, and any tax-benefit implications.',
+  'Does prepayment reduce EMI?':'Depending on lender policy, prepayment may reduce the EMI, shorten the tenure, or allow you to choose between the two.'
+};
+const flattenLibrary=groups=>Object.entries(groups).flatMap(([category,items])=>items.map(title=>({category,title})));
+const readLibrary=flattenLibrary(readGroups),faqLibrary=flattenLibrary(faqGroups);
+let readsPage=0,faqPage=0;
+const pageSize=10;
+function escapeHTML(value){return String(value).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]))}
+function readSummary(item){
+  const focus={
+    'Income Tax':'how the rule affects taxable income, the records to check, and common planning mistakes.',
+    'ITR Filing':'when the filing concept applies, the documents involved, and practical filing checks.',
+    'Salary':'how the component appears in CTC or payroll and how it can affect take-home pay and tax.',
+    'Investments':'how the product or return measure works, its risk and liquidity, and the tax questions to review.',
+    'Capital Gains':'classification, cost basis, holding period, set-off rules, and the records needed for reporting.',
+    'RSUs & ESOPs':'vesting or exercise taxation, sale reporting, cost basis, and foreign-asset considerations.',
+    'Banking':'return calculation, liquidity, tax treatment, and depositor protections or penalties.',
+    'Retirement':'time horizon, contribution strategy, inflation, withdrawal planning, and product constraints.',
+    'Personal Finance':'a practical framework, useful checkpoints, and common mistakes to avoid.'
+  };
+  return `A practical overview of "${item.title}", covering ${focus[item.category]}`;
+}
+function populateLibrarySelect(id,groups){
+  setHTML(id,`<option value="All">All categories</option>`+Object.keys(groups).map(category=>`<option value="${escapeHTML(category)}">${escapeHTML(category)}</option>`).join(''));
+}
+function filteredLibrary(items,searchId,categoryId){
+  const query=document.getElementById(searchId).value.trim().toLowerCase(),category=document.getElementById(categoryId).value;
+  return items.filter(item=>(category==='All'||item.category===category)&&(!query||`${item.title} ${item.category}`.toLowerCase().includes(query)));
+}
+function renderPagination(id,page,total,onChange){
+  const pages=Math.max(1,Math.ceil(total/pageSize));
+  setHTML(id,`<button class="ghost" ${page<=0?'disabled':''} onclick="${onChange}(-1)">Previous</button><span>Page ${page+1} of ${pages}</span><button class="ghost" ${page>=pages-1?'disabled':''} onclick="${onChange}(1)">Next</button>`);
+}
+function renderReads(){
+  const matches=filteredLibrary(readLibrary,'readsSearch','readsCategory'),pages=Math.max(1,Math.ceil(matches.length/pageSize));
+  readsPage=Math.min(readsPage,pages-1);
+  const visible=matches.slice(readsPage*pageSize,(readsPage+1)*pageSize);
+  setHTML('readsMeta',`${matches.length} recommended read${matches.length===1?'':'s'}`);
+  setHTML('readsGrid',visible.map(item=>`<details class="library-entry"><summary><span>${escapeHTML(item.title)}</span><small>${escapeHTML(item.category)}</small></summary><p>${escapeHTML(readSummary(item))}<br><a class="route-link" href="/vault/reads/${readSlug(item)}/">Read full guide</a></p></details>`).join('')||`<div class="empty-search">No reads match your search.</div>`);
+  renderPagination('readsPagination',readsPage,matches.length,'changeReadsPage');
+}
+function renderFaqs(){
+  const matches=filteredLibrary(faqLibrary,'faqSearch','faqCategory'),pages=Math.max(1,Math.ceil(matches.length/pageSize));
+  faqPage=Math.min(faqPage,pages-1);
+  const visible=matches.slice(faqPage*pageSize,(faqPage+1)*pageSize);
+  setHTML('faqMeta',`${matches.length} frequently asked question${matches.length===1?'':'s'}`);
+  setHTML('faqList',visible.map(item=>`<details class="library-entry"><summary><span>${escapeHTML(item.title)}</span><small>${escapeHTML(item.category)}</small></summary><p>${escapeHTML(faqAnswers[item.title]||'The answer depends on your facts and the rules for the relevant year. Verify current official guidance before acting.')}<br><a class="route-link" href="/vault/faqs/#${contentSlug(item.title)}">Permanent link</a></p></details>`).join('')||`<div class="empty-search">No FAQs match your search.</div>`);
+  renderPagination('faqPagination',faqPage,matches.length,'changeFaqPage');
+}
+function filterReads(){readsPage=0;renderReads()}
+function filterFaqs(){faqPage=0;renderFaqs()}
+function changeReadsPage(delta){readsPage+=delta;renderReads();document.getElementById('panel-reads').scrollIntoView({behavior:'smooth',block:'start'})}
+function changeFaqPage(delta){faqPage+=delta;renderFaqs();document.getElementById('panel-faq').scrollIntoView({behavior:'smooth',block:'start'})}
+function initContentLibraries(){
+  populateLibrarySelect('readsCategory',readGroups);
+  populateLibrarySelect('faqCategory',faqGroups);
+  renderReads();renderFaqs();
+  setHTML('homeCalcCount',formatNumber(toolsV2.length));
+  setHTML('homeReadCount',formatNumber(readLibrary.length));
+  setHTML('homeFaqCount',formatNumber(faqLibrary.length));
+}
+function initInfo(){
+  const deductions=[
+    ['80C','EPF, PPF, ELSS, life insurance, tuition fees, home loan principal. Cap Rs 1.5 lakh.'],
+    ['80D','Medical insurance for self/family/parents with senior citizen limits.'],
+    ['HRA','Old-regime exemption for salaried taxpayers paying rent.'],
+    ['80CCD(1B)','Extra Rs 50,000 for own NPS contribution under old regime.'],
+    ['Employer NPS','Can be useful under both regimes within salary-linked caps.'],
+    ['Home loan interest','Self-occupied house interest usually capped at Rs 2 lakh in old regime.']
+  ];
+  setHTML('deductionGrid',deductions.map(d=>`<div class="item"><strong>${d[0]}</strong><p>${d[1]}</p></div>`).join(''));
+  initContentLibraries();
+}
+
+function openPanel(panelId){
+  document.querySelectorAll('#mainTabs button').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  const navButton=document.querySelector(`#mainTabs button[data-panel="${panelId}"]`);
+  if(navButton)navButton.classList.add('active');
+  const panel=document.getElementById('panel-'+panelId);
+  if(panel)panel.classList.add('active');
+  closeMobileMenu();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+document.getElementById('mainTabs').addEventListener('click',e=>{
+  const btn=e.target.closest('button'); if(!btn) return;
+  openPanel(btn.dataset.panel);
+});
+function closeMobileMenu(){
+  document.getElementById('mainTabs').classList.remove('open');
+  document.getElementById('mobileMenuTrigger').setAttribute('aria-expanded','false');
+}
+function toggleMobileMenu(){
+  const nav=document.getElementById('mainTabs'),opening=!nav.classList.contains('open');
+  nav.classList.toggle('open',opening);
+  document.getElementById('mobileMenuTrigger').setAttribute('aria-expanded',String(opening));
+  closeThemeMenu();
+}
+const availableThemes=['premium-wealth','emerald-ledger','obsidian-rose','carbon-azure','noir-copper'];
+const storedTheme=localStorage.getItem('vaultTheme');
+const savedTheme = availableThemes.includes(storedTheme) ? storedTheme : 'premium-wealth';
+function syncThemeMenu(theme){
+  document.querySelectorAll('.theme-option').forEach(option=>{
+    const active=option.dataset.themeValue===theme;
+    option.classList.toggle('active',active);
+    option.querySelector('.theme-check').textContent=active?'\u2713':'';
+  });
+}
+function closeThemeMenu(){
+  document.getElementById('themeMenu').hidden=true;
+  document.getElementById('themeTrigger').setAttribute('aria-expanded','false');
+}
+function toggleThemeMenu(){
+  const menu=document.getElementById('themeMenu'),willOpen=menu.hidden;
+  menu.hidden=!willOpen;
+  document.getElementById('themeTrigger').setAttribute('aria-expanded',String(willOpen));
+}
+function setTheme(theme,persist=true){
+  if(!availableThemes.includes(theme))theme='premium-wealth';
+  document.getElementById('appRoot').setAttribute('data-theme',theme);
+  if(persist)localStorage.setItem('vaultTheme',theme);
+  syncThemeMenu(theme);
+  closeThemeMenu();
+}
+document.addEventListener('click',event=>{
+  if(!event.target.closest('#themeControl'))closeThemeMenu();
+  if(!event.target.closest('#mainTabs')&&!event.target.closest('#mobileMenuTrigger'))closeMobileMenu();
+});
+document.addEventListener('keydown',event=>{if(event.key==='Escape'){closeThemeMenu();closeMobileMenu();closeCalculatorPicker()}});
+setTheme(savedTheme,false);
+renderTools(); initInfo();
+</script>
+<script>openCalculatorTool("income");</script></body>
+</html>
