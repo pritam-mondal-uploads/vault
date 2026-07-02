@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://pritam-mondal-uploads.github.io/vault/sitemap.xml
+Sitemap: https://finance-calcs.netlify.app/sitemap.xml

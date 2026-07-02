@@ -186,16 +186,16 @@
     @media(max-width:680px){h2{font-size:18px}.grid2,.grid3,.result-grid,.article-grid,.education-grid{grid-template-columns:1fr}.cashflow{grid-template-columns:1fr;padding-right:42px;position:relative}.remove-cf{position:absolute;right:0;top:30px}.timeline-item{grid-template-columns:76px 10px 1fr}.timeline-item strong{grid-column:3}.calculator-education{margin-top:16px;padding-top:16px}.education-section{padding:13px 0}}
   </style>
 
-  <link rel="canonical" href="https://pritam-mondal-uploads.github.io/vault/">
+  <link rel="canonical" href="https://finance-calcs.netlify.app/">
   <meta property="og:title" content="Vault Finance - Finance Made Simple">
   <meta property="og:description" content="Free Indian personal finance calculators for tax, investments, banking, loans, salary, and retirement planning.">
-  <meta property="og:url" content="https://pritam-mondal-uploads.github.io/vault/">
-  <script type="application/ld+json">[{"@context":"https://schema.org","@type":"WebSite","name":"Vault Finance","url":"https://pritam-mondal-uploads.github.io/vault/","description":"Free Indian personal finance calculators, explainers, and FAQs.","publisher":{"@id":"https://pritam-mondal-uploads.github.io/vault/#organization"}},{"@context":"https://schema.org","@type":"Organization","@id":"https://pritam-mondal-uploads.github.io/vault/#organization","name":"Vault Finance","url":"https://pritam-mondal-uploads.github.io/vault/","founder":{"@type":"Person","name":"Pritam Mondal"},"email":"pritam.nothing.cmf1@gmail.com","sameAs":["https://pritam-mondal-uploads.github.io/vault/about/"]}]</script>
+  <meta property="og:url" content="https://finance-calcs.netlify.app/">
+  <script type="application/ld+json">[{"@context":"https://schema.org","@type":"WebSite","name":"Vault Finance","url":"https://finance-calcs.netlify.app/","description":"Free Indian personal finance calculators, explainers, and FAQs.","publisher":{"@id":"https://finance-calcs.netlify.app/#organization"}},{"@context":"https://schema.org","@type":"Organization","@id":"https://finance-calcs.netlify.app/#organization","name":"Vault Finance","url":"https://finance-calcs.netlify.app/","founder":{"@type":"Person","name":"Pritam Mondal"},"email":"pritam.nothing.cmf1@gmail.com","sameAs":["https://finance-calcs.netlify.app/about/"]}]</script>
 </head>
 <body>
 <div class="app" data-theme="premium-wealth" id="appRoot">
   <aside class="sidebar">
-    <a class="brand" href="https://pritam-mondal-uploads.github.io/vault/" aria-label="Go to Vault homepage"><div class="mark">&#8377;</div><div><h1>Vault Finance</h1><div class="tag">Finance Made Simple</div></div></a>
+    <a class="brand" href="/" aria-label="Go to Vault homepage"><div class="mark">&#8377;</div><div><h1>Vault Finance</h1><div class="tag">Finance Made Simple</div></div></a>
     <nav class="main-tabs" id="mainTabs">
       <button class="active" data-panel="home"><span class="num">01</span>Home</button>
       <button data-panel="calculators"><span class="num">02</span>Calculators</button>
@@ -205,7 +205,7 @@
     </nav>
     <p class="note">All inputs stay in your browser. Results are planning estimates and should be verified before financial decisions or filing.</p>
   </aside>
-  <a class="site-home-link" href="https://pritam-mondal-uploads.github.io/vault/" aria-label="Go to Vault homepage" title="Go to Vault homepage"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7"></path><path d="M5 9v11h14V9"></path><path d="M9 20v-6h6v6"></path></svg></a>
+  <a class="site-home-link" href="/" aria-label="Go to Vault homepage" title="Go to Vault homepage"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7"></path><path d="M5 9v11h14V9"></path><path d="M9 20v-6h6v6"></path></svg></a>
   <div class="theme-control" id="themeControl">
     <button class="theme-trigger" id="themeTrigger" type="button" aria-label="Choose theme" aria-haspopup="true" aria-expanded="false" title="Choose theme" onclick="toggleThemeMenu()">&#9680;</button>
     <div class="theme-menu" id="themeMenu" role="menu" hidden>
@@ -264,7 +264,7 @@
         <div class="card">
           <h2 id="toolTitle"></h2>
           <p class="sub" id="toolDesc"></p>
-          <a class="ghost route-link" id="calculatorPermalink" href="/vault/calculators/income-tax-calculator/">Open shareable calculator page</a>
+          <a class="ghost route-link" id="calculatorPermalink" href="/calculators/income-tax-calculator/">Open shareable calculator page</a>
           <div class="sub-tabs" id="subTabs"></div>
           <div id="toolPanes"></div>
         </div>
@@ -309,7 +309,7 @@
     <footer class="site-footer">
       <span>Vault Finance &middot; Finance Made Simple</span>
       <nav aria-label="Footer">
-        <a href="/vault/">Home</a><a href="/vault/calculators/">Calculators</a><a href="/vault/reads/">Reads</a><a href="/vault/faqs/">FAQs</a><a href="/vault/about/">About</a><a href="/vault/privacy/">Privacy</a><a href="/vault/contact/">Contact</a>
+        <a href="/">Home</a><a href="/calculators/">Calculators</a><a href="/reads/">Reads</a><a href="/faqs/">FAQs</a><a href="/about/">About</a><a href="/privacy/">Privacy</a><a href="/contact/">Contact</a>
       </nav>
     </footer>
   </main>
@@ -564,7 +564,7 @@ function selectTool(id){
   activeCategory=t.category;
   document.querySelectorAll('.picker-tool').forEach(b=>b.classList.toggle('active',b.dataset.tool===id));
   setHTML('toolTitle',t.title); setHTML('toolDesc',t.desc);
-  document.getElementById('calculatorPermalink').href=`/vault/calculators/${contentSlug(t.title)}/`;
+  document.getElementById('calculatorPermalink').href=`/calculators/${contentSlug(t.title)}/`;
   setHTML('subTabs',t.tabs.map((name,i)=>`<button class="sub-tab ${i===0?'active':''}" data-pane="${i}">${name}</button>`).join(''));
   setHTML('toolPanes',paneHTMLV2[id].map((html,i)=>`<div class="tab-pane ${i===0?'active':''}" data-pane="${i}">${html}</div>`).join(''));
   setHTML('toolEducation',calculatorEducation[id]||'');
@@ -901,7 +901,7 @@ function renderReads(){
   readsPage=Math.min(readsPage,pages-1);
   const visible=matches.slice(readsPage*pageSize,(readsPage+1)*pageSize);
   setHTML('readsMeta',`${matches.length} recommended read${matches.length===1?'':'s'}`);
-  setHTML('readsGrid',visible.map(item=>`<details class="library-entry"><summary><span>${escapeHTML(item.title)}</span><small>${escapeHTML(item.category)}</small></summary><p>${escapeHTML(readSummary(item))}<br><a class="route-link" href="/vault/reads/${readSlug(item)}/">Read full guide</a></p></details>`).join('')||`<div class="empty-search">No reads match your search.</div>`);
+  setHTML('readsGrid',visible.map(item=>`<details class="library-entry"><summary><span>${escapeHTML(item.title)}</span><small>${escapeHTML(item.category)}</small></summary><p>${escapeHTML(readSummary(item))}<br><a class="route-link" href="/reads/${readSlug(item)}/">Read full guide</a></p></details>`).join('')||`<div class="empty-search">No reads match your search.</div>`);
   renderPagination('readsPagination',readsPage,matches.length,'changeReadsPage');
 }
 function renderFaqs(){
@@ -909,7 +909,7 @@ function renderFaqs(){
   faqPage=Math.min(faqPage,pages-1);
   const visible=matches.slice(faqPage*pageSize,(faqPage+1)*pageSize);
   setHTML('faqMeta',`${matches.length} frequently asked question${matches.length===1?'':'s'}`);
-  setHTML('faqList',visible.map(item=>`<details class="library-entry"><summary><span>${escapeHTML(item.title)}</span><small>${escapeHTML(item.category)}</small></summary><p>${escapeHTML(faqAnswers[item.title]||'The answer depends on your facts and the rules for the relevant year. Verify current official guidance before acting.')}<br><a class="route-link" href="/vault/faqs/#${contentSlug(item.title)}">Permanent link</a></p></details>`).join('')||`<div class="empty-search">No FAQs match your search.</div>`);
+  setHTML('faqList',visible.map(item=>`<details class="library-entry"><summary><span>${escapeHTML(item.title)}</span><small>${escapeHTML(item.category)}</small></summary><p>${escapeHTML(faqAnswers[item.title]||'The answer depends on your facts and the rules for the relevant year. Verify current official guidance before acting.')}<br><a class="route-link" href="/faqs/#${contentSlug(item.title)}">Permanent link</a></p></details>`).join('')||`<div class="empty-search">No FAQs match your search.</div>`);
   renderPagination('faqPagination',faqPage,matches.length,'changeFaqPage');
 }
 function filterReads(){readsPage=0;renderReads()}
